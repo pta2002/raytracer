@@ -16,5 +16,5 @@ add_executable(vi-rt ${sources})
 target_link_libraries(vi-rt fmt::fmt)
 target_link_libraries(vi-rt tinyobjloader)
 
-target_include_directories(vi-rt PRIVATE src)
+target_include_directories(vi-rt PRIVATE src include)
 
