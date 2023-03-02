@@ -1,0 +1,6 @@
+[submodule "vendor/fmt"]
+	path = vendor/fmt
+	url = https://github.com/fmtlib/fmt
+[submodule "vendor/tinyobjloader"]
+	path = vendor/tinyobjloader
+	url = https://github.com/tinyobjloader/tinyobjloader
