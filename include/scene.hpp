@@ -2,18 +2,18 @@
 
 #include <optional>
 #include <string>
+#include <tiny_obj_loader.h>
 
 class Scene {
+private:
+    void info(const tinyobj::ObjReader& obj);
 public:
-
-  static attrib_t attributes;
-  
-  static std::vector<shape_t> shapes;
-
-  static std::vector<material_t> materials;
+  tinyobj::attrib_t attributes;
+  std::vector<tinyobj::shape_t> shapes;
+  std::vector<tinyobj::material_t> materials;
   /**
    * Loads and creates a scene from a filename
    */
-  static std::optional<Scene> load(const std::string &filename, const std::string mtlDir);
+  static std::optional<Scene> load(const std::string &filename, const std::string &mtlDir);
   ~Scene();
 };

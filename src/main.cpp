@@ -2,8 +2,8 @@
 #include "scene.hpp"
 
 int main(int argc, char **argv) {
-  if (argc == 2) {
-    auto scene = Scene::load(argv[1]);
+  if (argc == 3) {
+    auto scene = Scene::load(argv[1], argv[2]);
     if (scene.has_value()) {
       fmt::println("Loaded scene");
     } else {
@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
       return -1;
     }
   } else {
-    fmt::println(stderr, "USAGE: {} [filename]", argv[0]);
+    fmt::println(stderr, "USAGE: {} [filename] [materials directory]", argv[0]);
     return -1;
   }
 }
