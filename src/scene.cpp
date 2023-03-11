@@ -1,17 +1,12 @@
 #include "scene.hpp"
 
 #include <fmt/core.h>
-#include <iostream>
 #include <optional>
 #include <tiny_obj_loader.h>
 
 using namespace tinyobj;
 
-void Scene::info(const ObjReader &obj) {
-  attributes = obj.GetAttrib();
-  shapes = obj.GetShapes();
-  materials = obj.GetMaterials();
-
+void Scene::info(void) {
   fmt::println("# of vertices: {}", attributes.vertices.size() / 3);
   fmt::println("# of normals: {}", attributes.normals.size() / 3);
   fmt::println("# of textCoords: {}", attributes.texcoords.size() / 2);
@@ -33,34 +28,31 @@ void Scene::info(const ObjReader &obj) {
 }
 
 // https://github.com/canmom/rasteriser/blob/master/fileloader.cpp
-std::optional<Scene> Scene::load(const std::string &filename,
-                                 const std::string &mtlDir) {
-
+std::optional<Scene> Scene::load(const std::string &filename) {
   ObjReader myObjReader;
-  std::string name = "";
 
   if (!myObjReader.ParseFromFile(filename)) {
     return std::nullopt;
-  } else {
-    return std::make_optional<Scene>();
   }
 
-  /* TODO
-  Scene::attributes = myObjReader.GetAttrib();
-  Scene::shapes = myObjReader.GetShapes();
-  Scene::materials = myObjReader.GetMaterials();
+  Scene scene;
+
+  scene.attributes = myObjReader.GetAttrib();
+  scene.shapes = myObjReader.GetShapes();
+  scene.materials = myObjReader.GetMaterials();
   std::string err;
 
-  auto it_shapes = Scene::shapes.begin();
+  scene.info();
 
-  if(name != it_shapes->name) { // The first time a new obj is loaded it shows
-  you the info info(myObjReader); name = it_shapes->name;
-  }
-  bool success = LoadObj(&attributes, &shapes, &materials, &err,
-  filename.c_str(), mtlDir.c_str(), true);
-   */
+  return {scene};
+
+  //  auto it_shapes = Scene::shapes.begin();
+  //
+  //  if (name != it_shapes->name) {
+  //    // The first time an object is loaded it shows you its info
+  //    scene.info(myObjReader);
+  //    name = it_shapes->name;
+  //  }
 }
 
-Scene::~Scene() {
-  // TODO
-}
+Scene::~Scene() = default;
