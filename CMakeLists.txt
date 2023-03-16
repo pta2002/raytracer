@@ -22,6 +22,7 @@ target_link_libraries(vi-rt fmt::fmt)
 target_link_libraries(vi-rt tinyobjloader)
 target_link_libraries(vi-rt miniz)
 target_link_libraries(vi-rt glm)
+target_link_libraries(vi-rt m)
 
 target_include_directories(vi-rt PRIVATE src include)
 target_include_directories(vi-rt PRIVATE vendor/libspng)

@@ -1,9 +1,23 @@
 #include "camera.hpp"
 #include "fmt/core.h"
 
+#include <glm/glm.hpp>
+#include <glm/mat3x3.hpp>
+
 glm::vec3 Camera::getRay(uint32_t x, uint32_t y) {
   // TODO: Calculate ray
-  return {0, 0, 0};
+  double xs = 2 * (x + 0.5) / width - 1;
+  double ys = 2 * (y + 0.5) / height - 1;
+
+  double xc = xs * angle_w;
+  double yc = ys * angle_h;
+
+  vec3 forward = normalize(lookingAt - pos);
+  vec3 right = normalize(cross(up, forward));
+
+  mat3x3 c2w{right, up, forward};
+
+  return normalize(c2w * vec3(xc, yc, 1));
 }
 
 void Camera::render() {
