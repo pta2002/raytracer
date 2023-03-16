@@ -4,6 +4,7 @@
 #include <string>
 #include <tiny_obj_loader.h>
 
+
 class Scene {
 private:
   void info();
@@ -16,6 +17,6 @@ public:
   /**
    * Loads and creates a scene from a filename
    */
-  static std::optional<Scene> load(const std::string &filename);
+  static std::optional<Scene> load(const std::string &filename, vector<vec3> &vertices, vector<vec3> & vertNormal, vector<vec2>& uvs);
   ~Scene();
 };
