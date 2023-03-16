@@ -1,46 +1,47 @@
 #pragma once
 
+#include "material.hpp"
+#include <array>
+#include <vector>
+
+#include <glm/vec3.hpp>
+
 using namespace std;
 using namespace glm;
 
-#include <vector>
-#include <array>
-#include "material.hpp"
-
-#include "glm.hpp"
-
 class Triangle {
-    public:
-        Triangle() = default;
-        Triangle(int v1, int v2, int v3);
+public:
+  Triangle() = default;
+  Triangle(array<int, 3> vertices, array<int, 3> normals,
+           array<int, 3> texcoords, int material)
+      : vertexIndices{vertices}, normalIndices{normals},
+        texcoordIndices{texcoords}, material{material} {};
 
-        /**
-         * Indices for the three vertices that make up the triangle.
-         */
-        vec3 vertexIndices;
-        /** 
-         * Indices for the three normal vectors for each vertex that
-         * are needed for interpolated normal calculation in interpolated 
-         * shading.
-         */  
-        vec3 shadingIndices;
-        /**  
-         * Three dimensional vector describing the normal direction of the
-         * triangle for simple shading.
-         */
-        vec3 geometryNormal;
-        /**
-         * 
-        */
-        int material;
-
-        Triangle(vec3 v, vec3 n, vec3 uv, int m) : vertexIndices(v), geometryNormal(n), shadingIndices(uv), material(m) {};
+  /**
+   * Indices for the three vertices that make up the triangle.
+   */
+  array<int, 3> vertexIndices;
+  /**
+   * Indices for the three normal vectors for each vertex that
+   * are needed for interpolated normal calculation in interpolated
+   * shading.
+   */
+  array<int, 3> normalIndices;
+  /**
+   * Three dimensional vector describing the normal direction of the
+   * triangle for simple shading.
+   */
+  array<int, 3> texcoordIndices;
+  /**
+   *
+   */
+  int material;
 };
 
 class Geometry {
-    public:
-        Geometry() = default;
+public:
+  Geometry() = default;
 
-        vector<Triangle> triangles;
-        Material  material;
+  vector<Triangle> triangles;
+  Material material;
 };
