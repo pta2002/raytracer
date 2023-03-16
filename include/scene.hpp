@@ -5,6 +5,7 @@
 #include <optional>
 #include <string>
 #include <tiny_obj_loader.h>
+#include <light.hpp>
 
 class Scene {
 private:
@@ -14,6 +15,8 @@ public:
   tinyobj::attrib_t attributes;
   std::vector<tinyobj::shape_t> shapes;
   std::vector<tinyobj::material_t> materials;
+  std::vector<Light> lights;
+
 
   /**
    * Loads and creates a scene from a filename
