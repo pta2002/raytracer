@@ -1,18 +1,17 @@
 #include "scene.hpp"
 
 #include <fmt/core.h>
-#include <optional>
 #include <iostream>
+#include <optional>
 
 #include <tiny_obj_loader.h>
-#include <vector2.hpp>
-#include <vector3.hpp>
 
 using namespace tinyobj;
+using namespace glm;
 
 using std::vector;
 
-void Scene::info(void) {
+void Scene::info() {
   fmt::println("# of vertices: {}", attributes.vertices.size() / 3);
   fmt::println("# of normals: {}", attributes.normals.size() / 3);
   fmt::println("# of textCoords: {}", attributes.texcoords.size() / 2);
@@ -33,20 +32,24 @@ void Scene::info(void) {
   }
 }
 
-void componentToVec2(const vector<float> components, vector<vec2>& vecs) {
-    for(size_t v_start=0; v_start < components.size(); v_start+=2) 
-      vecs.push_back(vec2(components[v_start], components[v_start+1]));
+void componentToVec2(const vector<float> &components, vector<vec2> &vecs) {
+  for (size_t v_start = 0; v_start < components.size(); v_start += 2)
+    vecs.push_back(vec2(components[v_start], components[v_start + 1]));
 }
 
-void componentToVec3(const vector<float> components, vector<vec3>& vecs) {
-    for(size_t v_start=0; v_start < components.size(); v_start+=3)
-      vecs.push_back(vec3(components[v_start], components[v_start+1], components[v_start+2]));
+void componentToVec3(const vector<float> components, vector<vec3> &vecs) {
+  for (size_t v_start = 0; v_start < components.size(); v_start += 3)
+    vecs.push_back(vec3(components[v_start], components[v_start + 1],
+                        components[v_start + 2]));
 }
 
 // https://github.com/canmom/rasteriser/blob/master/fileloader.cpp
 
-// std::optional<Scene> Scene::load(const std::string &filename, const std::string mats)
-std::optional<Scene> Scene::load(const std::string &filename, vector<vec3> &vertices, vector<vec3> & vertNormal, vector<vec2>& uvs) {
+// std::optional<Scene> Scene::load(const std::string &filename, const
+// std::string mats)
+std::optional<Scene> Scene::load(const std::string &filename,
+                                 vector<vec3> &vertices,
+                                 vector<vec3> &vertNormal, vector<vec2> &uvs) {
   ObjReader myObjReader;
 
   if (!myObjReader.ParseFromFile(filename)) {
@@ -71,25 +74,25 @@ std::optional<Scene> Scene::load(const std::string &filename, vector<vec3> &vert
   scene.info();
 
   /** bool success = tinyobj::LoadObj(&attributes,
-                                  &shapes, 
-                                  &materials, 
+                                  &shapes,
+                                  &materials,
                                   &err,
                                   filename,
                                   mats,
                                   true); */
-  
-  if(!err.empty()) std::cerr << err << std::endl;
+
+  if (!err.empty())
+    std::cerr << err << std::endl;
 
   // if(!success) exit(1)
 
   componentToVec3(scene.attributes.vertices, vertices);
-  
+
   componentToVec3(scene.attributes.normals, vertNormal);
 
   componentToVec2(scene.attributes.texcoords, uvs);
 
   return {scene};
-
 }
 
 Scene::~Scene() = default;

@@ -1,9 +1,10 @@
 #pragma once
 
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 #include <optional>
 #include <string>
 #include <tiny_obj_loader.h>
-
 
 class Scene {
 private:
@@ -17,6 +18,9 @@ public:
   /**
    * Loads and creates a scene from a filename
    */
-  static std::optional<Scene> load(const std::string &filename, vector<vec3> &vertices, vector<vec3> & vertNormal, vector<vec2>& uvs);
+  static std::optional<Scene> load(const std::string &filename,
+                                   std::vector<glm::vec3> &vertices,
+                                   std::vector<glm::vec3> &vertNormal,
+                                   std::vector<glm::vec2> &uvs);
   ~Scene();
 };
