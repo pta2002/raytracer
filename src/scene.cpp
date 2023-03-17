@@ -114,7 +114,7 @@ Image Scene::render() {
 
       img.imageData.insert(
           img.imageData.end(),
-          {0, static_cast<unsigned char>(intersections) * 8, 0});
+          {0, static_cast<unsigned char>(intersections * 8), 0});
     }
   }
 

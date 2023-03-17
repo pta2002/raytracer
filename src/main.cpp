@@ -19,8 +19,9 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  Camera cam =
-      Camera(100, 50, M_PI / 2, M_PI / 4, {0, 1, 0}, {0, 0, 0}, {0, 0, 1});
+  // TODO: O vetor up não está perpendicular com o looking at acho eu?
+  Camera cam = Camera(100, 50, M_PI / 2, M_PI / 4, {0, 1, 0}, {0, -1000, -400},
+                      {0, 0, 0});
 
   scene.value().setCamera(cam);
   Image i = scene.value().render();
