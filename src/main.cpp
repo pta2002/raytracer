@@ -21,12 +21,13 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  // TODO: O vetor up não está perpendicular com o looking at acho eu?
-  Camera cam = Camera(1920, 1080, M_PI / 3, M_PI / 5, {0, -1, 0},
-                      {200, 200, -800}, {250, 250, 250});
+  for (int i = 0; i < 1; i++) {
+    Camera cam = Camera(1920, 1080, M_PI / 3, M_PI / 5, {0, -1, 0},
+                        {(i - 30) * 5, 200, -800}, {250, 250, 250});
 
-  scene.value().setCamera(cam);
-  Image i = scene.value().render();
+    scene.value().setCamera(cam);
+    Image img = scene.value().render();
 
-  i.writePNG("image.png");
+    img.writePNG(fmt::format("image{}.png", i));
+  }
 }
