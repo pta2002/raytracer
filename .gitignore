@@ -37,3 +37,5 @@ compile_commands.json
 *.app
 .idea
 .vscode
+
+image.png
