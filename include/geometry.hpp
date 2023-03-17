@@ -3,6 +3,7 @@
 #include "material.hpp"
 #include <array>
 #include <vector>
+#include <tiny_obj_loader.h>
 
 #include <glm/vec3.hpp>
 
@@ -36,6 +37,8 @@ public:
    *
    */
   int material;
+
+  array<vec3, 3> getVertices(const tinyobj::attrib_t &attrib);
 };
 
 class Geometry {

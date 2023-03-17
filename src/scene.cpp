@@ -33,41 +33,7 @@ void Scene::info() {
   }
 }
 
-// void Scene::componentToVec2(const vector<float> &components,
-//                             vector<vec2> &vecs) {
-//   for (size_t v_start = 0; v_start < components.size(); v_start += 2)
-//     vecs.push_back(vec2(components[v_start], components[v_start + 1]));
-// }
-//
-// void Scene::componentToVec3(const vector<float> components,
-//                             vector<vec3> &vecs) {
-//   for (size_t v_start = 0; v_start < components.size(); v_start += 3)
-//     vecs.push_back(vec3(components[v_start], components[v_start + 1],
-//                         components[v_start + 2]));
-//}
-
-// void Scene::loadFaces(shape_t &shape, vector<Triangle> &faces) {
-//   const vector<index_t> &indices = shape.mesh.indices;
-//   const vector<int> &mat_idx = shape.mesh.material_ids;
-//
-//   fmt::print("# Loading {} triangles...", mat_idx.size());
-//
-//   for (size_t face_idx = 0; face_idx < mat_idx.size(); face_idx++) {
-//     faces.push_back(Triangle({indices[3 * face_idx].vertex_index,
-//                               indices[3 * face_idx + 1].vertex_index,
-//                               indices[3 * face_idx + 2].vertex_index},
-//                              {indices[3 * face_idx].normal_index,
-//                               indices[3 * face_idx + 1].normal_index,
-//                               indices[3 * face_idx + 2].normal_index},
-//                              {indices[3 * face_idx].texcoord_index,
-//                               indices[3 * face_idx + 1].texcoord_index,
-//                               indices[3 * face_idx + 2].texcoord_index},
-//                              mat_idx[face_idx]));
-//   }
-// }
-
 // https://github.com/canmom/rasteriser/blob/master/fileloader.cpp
-
 // std::optional<Scene> Scene::load(const std::string &filename, const
 // std::string mats)
 std::optional<Scene> Scene::load(const std::string &filename) {
@@ -112,14 +78,6 @@ std::optional<Scene> Scene::load(const std::string &filename) {
                                materialIndex);
     }
   }
-
-  //  scene.componentToVec3(scene.attributes.vertices, vertices);
-  //
-  //  scene.componentToVec3(scene.attributes.normals, vertNormal);
-  //
-  //  scene.componentToVec2(scene.attributes.texcoords, uvs);
-  //
-  //  for(auto shape : scene.shapes) scene.loadFaces(shape, triangles);
 
   return {scene};
 }
