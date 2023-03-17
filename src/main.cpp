@@ -7,7 +7,6 @@
 
 #include <cmath>
 
-
 int main(int argc, char **argv) {
   // Check command-line arguments
   if (argc != 2) {
@@ -23,8 +22,8 @@ int main(int argc, char **argv) {
   }
 
   // TODO: O vetor up não está perpendicular com o looking at acho eu?
-  Camera cam = Camera(100, 50, M_PI / 2, M_PI / 4, {0, 1, 0}, {0, -200, -800},
-                      {0, 0, 0});
+  Camera cam = Camera(1920, 1080, M_PI / 3, M_PI / 5, {0, -1, 0},
+                      {200, 200, -800}, {250, 250, 250});
 
   scene.value().setCamera(cam);
   Image i = scene.value().render();

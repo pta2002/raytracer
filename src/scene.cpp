@@ -96,41 +96,49 @@ Image Scene::render() {
 
   Image img{camera->width, camera->height};
 
+  fmt::print(fmt::emphasis::bold | fg(fmt::color::blue), "[info] ");
   fmt::println("width: {} height: {}", camera->width, camera->height);
   int pixel = 0;
   for (uint32_t y = 0; y < camera->height; y++) {
     for (uint32_t x = 0; x < camera->width; x++) {
       auto ray = camera->getRay(x, y);
-      // int intersections = 0;
-      vec3 intersection = {};
-      float dist = -1;
+
+      const tinyobj::material_t *mat = nullptr;
+      float dist = FLT_MAX;
       for (auto &face : faces) {
-        // TODO: Temos de testar se a face está à frente da interseção que já
-        // encontrámos
-        if (auto new_intersection = face.intersects(this->attributes, ray, this->camera->pos)) {
+        if (auto new_intersection =
+                face.intersects(this->attributes, ray, this->camera->pos)) {
           float new_dist = distance(this->camera->pos, *new_intersection);
           if (dist > new_dist) {
-            intersection = *new_intersection;
             dist = new_dist;
+            mat = &materials[face.material];
           }
-          fmt::print(fmt::emphasis::bold | fg(fmt::color::green),
-                     "[render {},{}] ", x, y);
-          fmt::println("FOUND INTERSECTION {} {} {}", ray.x, ray.y, ray.z);
-          // intersections++;
         }
       }
       vec3 color = vec3(0);
       for (Light l : this->lights) {
         color += l.light();
       }
+
+      if (mat) {
+        color.r += mat->diffuse[0];
+        color.g += mat->diffuse[1];
+        color.b += mat->diffuse[2];
+      }
+
+      // TODO: proper gamma correction
+
       img.imageData.insert(
           img.imageData.end(),
           //{0, static_cast<unsigned char>(intersections * 8), 0});
-          {static_cast<unsigned char>(color.r),
-           static_cast<unsigned char>(color.g),
-           static_cast<unsigned char>(color.b)});
+          {static_cast<unsigned char>(color.r * 255),
+           static_cast<unsigned char>(color.g * 255),
+           static_cast<unsigned char>(color.b * 255)});
     }
   }
+
+  fmt::print(fmt::emphasis::bold | fg(fmt::color::blue), "[info] ");
+  fmt::println("Finished rendering");
 
   return img;
 }
