@@ -20,10 +20,10 @@ int main(int argc, char **argv) {
   }
 
   Camera cam =
-      Camera(4, 4, M_PI / 2, M_PI / 4, {0, 1, 0}, {0, 0, 0}, {0, 0, 1});
-  //  cam.render();
+      Camera(100, 50, M_PI / 2, M_PI / 4, {0, 1, 0}, {0, 0, 0}, {0, 0, 1});
 
-  //  Image i = Image();
-  //
-  //  i.writePNG("image.png");
+  scene.value().setCamera(cam);
+  Image i = scene.value().render();
+
+  i.writePNG("image.png");
 }

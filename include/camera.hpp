@@ -8,8 +8,6 @@ using namespace glm;
 
 class Camera {
 private:
-  uint32_t width;
-  uint32_t height;
   double angle_w;
   double angle_h;
   vec3 up{};
@@ -20,10 +18,12 @@ private:
   mat3 camera2world{};
 
 public:
+  uint32_t width;
+  uint32_t height;
   Camera(uint32_t width, uint32_t height, double angle_x, double angle_y,
          vec3 up, vec3 pos, vec3 lookingAt);
 
-  glm::vec3 getRay(uint32_t x, uint32_t y);
+  glm::vec3 getRay(uint32_t x, uint32_t y) const;
 
   void render();
 };

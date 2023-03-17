@@ -81,5 +81,27 @@ std::optional<Scene> Scene::load(const std::string &filename) {
 
   return {scene};
 }
+void Scene::setCamera(const Camera &newCamera) { this->camera = &newCamera; }
 
 Scene::~Scene() = default;
+
+Image Scene::render() {
+  if (this->camera == nullptr) {
+    throw std::runtime_error{"Camera must be set"};
+  }
+
+  fmt::print(fmt::emphasis::bold | fg(fmt::color::blue), "[info] ");
+  fmt::println("Starting render");
+
+  fmt::println("width: {} height: {}", camera->width, camera->height);
+  for (uint32_t y = 0; y < camera->height; y++) {
+    for (uint32_t x = 0; x < camera->width; x++) {
+      auto ray = camera->getRay(x, y);
+      fmt::print(fmt::emphasis::bold | fg(fmt::color::orange),
+                 "[render {},{}] ", x, y);
+      fmt::println("Sending ray in direction {} {} {}", ray.x, ray.y, ray.z);
+    }
+  }
+
+  return Image();
+}

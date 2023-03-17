@@ -1,11 +1,14 @@
 #pragma once
 
+#include "camera.hpp"
 #include "geometry.hpp"
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <light.hpp>
+#include <memory>
 #include <optional>
 #include <string>
+#include "image.hpp"
 #include <tiny_obj_loader.h>
 
 using namespace glm;
@@ -16,6 +19,8 @@ private:
   std::vector<vec3> vertices;
   std::vector<vec3> vertNormal;
   std::vector<vec2> uvs;
+
+  const Camera *camera = nullptr;
 
   void info();
 
@@ -34,4 +39,8 @@ public:
    */
   static std::optional<Scene> load(const std::string &filename);
   ~Scene();
+
+  void setCamera(const Camera &camera);
+
+  Image render();
 };
