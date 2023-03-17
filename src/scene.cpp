@@ -103,5 +103,5 @@ Image Scene::render() {
     }
   }
 
-  return Image();
+  return {camera->width, camera->height};
 }

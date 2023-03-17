@@ -3,16 +3,8 @@
 #include <image.hpp>
 #include <spng/spng.h>
 
-Image::Image() {
-  imageData = {};
-  width = 128;
-  height = 64;
-
-  for (int i = 0; i < width * height; i++) {
-    imageData.push_back(255);
-    imageData.push_back(0);
-    imageData.push_back(0);
-  }
+Image::Image(uint32_t width, uint32_t height) : width{width}, height{height} {
+  imageData.reserve(width * height);
 }
 
 bool Image::writePNG(const std::string &filename) {
