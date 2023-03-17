@@ -11,7 +11,6 @@ private:
   double angle_w;
   double angle_h;
   vec3 up{};
-  vec3 pos{};
   vec3 lookingAt{};
 
   vec3 forward{}, right{};
@@ -26,4 +25,5 @@ public:
   glm::vec3 getRay(uint32_t x, uint32_t y) const;
 
   void render();
+  vec3 pos{};
 };

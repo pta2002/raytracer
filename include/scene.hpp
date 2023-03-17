@@ -2,13 +2,13 @@
 
 #include "camera.hpp"
 #include "geometry.hpp"
+#include "image.hpp"
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <light.hpp>
 #include <memory>
 #include <optional>
 #include <string>
-#include "image.hpp"
 #include <tiny_obj_loader.h>
 
 using namespace glm;
@@ -16,9 +16,6 @@ using namespace glm;
 class Scene {
 private:
   std::vector<Triangle> faces;
-  std::vector<vec3> vertices;
-  std::vector<vec3> vertNormal;
-  std::vector<vec2> uvs;
 
   const Camera *camera = nullptr;
 

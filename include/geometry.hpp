@@ -2,8 +2,8 @@
 
 #include "material.hpp"
 #include <array>
-#include <vector>
 #include <tiny_obj_loader.h>
+#include <vector>
 
 #include <glm/vec3.hpp>
 
@@ -39,6 +39,14 @@ public:
   int material;
 
   array<vec3, 3> getVertices(const tinyobj::attrib_t &attrib);
+
+  /**
+   * Checks if a ray intersects the triangle
+   * @param ray The ray vector
+   * @param origin The origin point of the ray
+   * @return Boolean specifying whether an intersection was detected
+   */
+  bool intersects(const tinyobj::attrib_t &attrib, vec3 ray, vec3 origin);
 };
 
 class Geometry {

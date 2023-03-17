@@ -93,15 +93,30 @@ Image Scene::render() {
   fmt::print(fmt::emphasis::bold | fg(fmt::color::blue), "[info] ");
   fmt::println("Starting render");
 
+  Image img{camera->width, camera->height};
+
   fmt::println("width: {} height: {}", camera->width, camera->height);
   for (uint32_t y = 0; y < camera->height; y++) {
     for (uint32_t x = 0; x < camera->width; x++) {
       auto ray = camera->getRay(x, y);
-      fmt::print(fmt::emphasis::bold | fg(fmt::color::orange),
-                 "[render {},{}] ", x, y);
-      fmt::println("Sending ray in direction {} {} {}", ray.x, ray.y, ray.z);
+
+      int intersections = 0;
+      for (auto &face : faces) {
+        // TODO: Temos de testar se a face está à frente da interseção que já
+        // encontrámos
+        if (face.intersects(attributes, ray, camera->pos)) {
+          fmt::print(fmt::emphasis::bold | fg(fmt::color::green),
+                     "[render {},{}] ", x, y);
+          fmt::println("FOUND INTERSECTION {} {} {}", ray.x, ray.y, ray.z);
+          intersections++;
+        }
+      }
+
+      img.imageData.insert(
+          img.imageData.end(),
+          {0, static_cast<unsigned char>(intersections) * 8, 0});
     }
   }
 
-  return {camera->width, camera->height};
+  return img;
 }
