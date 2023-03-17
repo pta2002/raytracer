@@ -1,9 +1,12 @@
+#define _USE_MATH_DEFINES
+
 #include "camera.hpp"
 #include "image.hpp"
 #include "scene.hpp"
 #include <fmt/core.h>
 
 #include <cmath>
+
 
 int main(int argc, char **argv) {
   // Check command-line arguments

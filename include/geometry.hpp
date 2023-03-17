@@ -4,6 +4,7 @@
 #include <array>
 #include <tiny_obj_loader.h>
 #include <vector>
+#include <optional>
 
 #include <glm/vec3.hpp>
 
@@ -46,7 +47,7 @@ public:
    * @param origin The origin point of the ray
    * @return Boolean specifying whether an intersection was detected
    */
-  bool intersects(const tinyobj::attrib_t &attrib, vec3 ray, vec3 origin);
+  optional<vec3> intersects(const tinyobj::attrib_t &attrib, vec3 ray, vec3 origin);
 };
 
 class Geometry {

@@ -1,5 +1,6 @@
 #include "scene.hpp"
 #include "geometry.hpp"
+#include "light.hpp"
 
 #include <fmt/color.h>
 #include <fmt/core.h>
@@ -96,25 +97,38 @@ Image Scene::render() {
   Image img{camera->width, camera->height};
 
   fmt::println("width: {} height: {}", camera->width, camera->height);
+  int pixel = 0;
   for (uint32_t y = 0; y < camera->height; y++) {
     for (uint32_t x = 0; x < camera->width; x++) {
       auto ray = camera->getRay(x, y);
-
-      int intersections = 0;
+      // int intersections = 0;
+      vec3 intersection = {};
+      float dist = -1;
       for (auto &face : faces) {
         // TODO: Temos de testar se a face está à frente da interseção que já
         // encontrámos
-        if (face.intersects(attributes, ray, camera->pos)) {
+        if (auto new_intersection = face.intersects(this->attributes, ray, this->camera->pos)) {
+          float new_dist = distance(this->camera->pos, *new_intersection);
+          if (dist > new_dist) {
+            intersection = *new_intersection;
+            dist = new_dist;
+          }
           fmt::print(fmt::emphasis::bold | fg(fmt::color::green),
                      "[render {},{}] ", x, y);
           fmt::println("FOUND INTERSECTION {} {} {}", ray.x, ray.y, ray.z);
-          intersections++;
+          // intersections++;
         }
       }
-
+      vec3 color = vec3(0);
+      for (Light l : this->lights) {
+        color += l.light();
+      }
       img.imageData.insert(
           img.imageData.end(),
-          {0, static_cast<unsigned char>(intersections * 8), 0});
+          //{0, static_cast<unsigned char>(intersections * 8), 0});
+          {static_cast<unsigned char>(color.r),
+           static_cast<unsigned char>(color.g),
+           static_cast<unsigned char>(color.b)});
     }
   }
 
