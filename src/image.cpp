@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <fmt/color.h>
 #include <fmt/core.h>
 #include <image.hpp>
 #include <spng/spng.h>
@@ -31,7 +32,9 @@ bool Image::writePNG(const std::string &filename) {
 
   if ((ret = spng_encode_image(ctx, imageData.data(), imageData.size(),
                                SPNG_FMT_PNG, SPNG_ENCODE_FINALIZE))) {
-    fmt::println(stderr, "spng encoding error: {}", spng_strerror(ret));
+    fmt::print(stderr, fmt::emphasis::bold | fg(fmt::color::red),
+               "[spng::error] ");
+    fmt::println(stderr, "{}", spng_strerror(ret));
     spng_ctx_free(ctx);
     return false;
   }
@@ -40,7 +43,10 @@ bool Image::writePNG(const std::string &filename) {
   void *png_buf = spng_get_png_buffer(ctx, &png_size, &ret);
 
   if (ret) {
-    fmt::println(stderr, "spng encoding error: {}", spng_strerror(ret));
+    fmt::print(stderr, fmt::emphasis::bold | fg(fmt::color::red),
+               "[spng::error] ");
+    fmt::println(stderr, "{}", spng_strerror(ret));
+    spng_ctx_free(ctx);
     return false;
   }
 
