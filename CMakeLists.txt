@@ -13,7 +13,8 @@ add_subdirectory(vendor/tinyobjloader)
 add_subdirectory(vendor/miniz)
 add_subdirectory(vendor/glm)
 
-add_compile_definitions(SPNG_USE_MINIZ)
+# Necessary so that spng compiles on windows!
+add_compile_definitions(SPNG_USE_MINIZ SPNG_STATIC)
 
 add_executable(vi-rt ${sources}
         vendor/libspng/spng/spng.c)
