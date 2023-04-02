@@ -4,14 +4,28 @@
 
 #include <fmt/color.h>
 #include <fmt/core.h>
+#include <fstream>
 #include <optional>
 
+#include "shader.hpp"
+#include <nlohmann/json.hpp>
 #include <tiny_obj_loader.h>
 
 using namespace tinyobj;
 using namespace glm;
-
 using std::vector;
+
+class SceneDef {
+public:
+  std::string modelFile;
+
+  explicit SceneDef(const std::string &filename) {
+    std::ifstream js(filename);
+    auto data = nlohmann::json::parse(js);
+
+    modelFile = data["model"];
+  }
+};
 
 void Scene::info() {
   fmt::println("# of vertices: {}", attributes.vertices.size() / 3);
@@ -38,9 +52,11 @@ void Scene::info() {
 // std::optional<Scene> Scene::load(const std::string &filename, const
 // std::string mats)
 std::optional<Scene> Scene::load(const std::string &filename) {
+  SceneDef def = SceneDef(filename);
+
   ObjReader myObjReader;
 
-  if (!myObjReader.ParseFromFile(filename)) {
+  if (!myObjReader.ParseFromFile(def.modelFile)) {
     return std::nullopt;
   }
 
@@ -74,28 +90,28 @@ std::optional<Scene> Scene::load(const std::string &filename) {
                                     indices[3 * face_id + 2].texcoord_index};
 
       array<vec3, 3> vertices{
-          vec3(scene.attributes.vertices[normalIndices[0]],
-               scene.attributes.vertices[normalIndices[0] + 1],
-               scene.attributes.vertices[normalIndices[0] + 2]),
-          vec3(scene.attributes.vertices[normalIndices[1]],
-               scene.attributes.vertices[normalIndices[1] + 1],
-               scene.attributes.vertices[normalIndices[1] + 2]),
-          vec3(scene.attributes.vertices[normalIndices[2]],
-               scene.attributes.vertices[normalIndices[2] + 1],
-               scene.attributes.vertices[normalIndices[2] + 2])};
+          vec3(scene.attributes.vertices[vertexIndices[0] * 3],
+               scene.attributes.vertices[vertexIndices[0] * 3 + 1],
+               scene.attributes.vertices[vertexIndices[0] * 3 + 2]),
+          vec3(scene.attributes.vertices[vertexIndices[1] * 3],
+               scene.attributes.vertices[vertexIndices[1] * 3 + 1],
+               scene.attributes.vertices[vertexIndices[1] * 3 + 2]),
+          vec3(scene.attributes.vertices[vertexIndices[2] * 3],
+               scene.attributes.vertices[vertexIndices[2] * 3 + 1],
+               scene.attributes.vertices[vertexIndices[2] * 3 + 2])};
 
       std::optional<array<vec3, 3>> normals = {};
 
       if (normalIndices[0] > 0) {
-        normals = {vec3(scene.attributes.normals[normalIndices[0]],
-                        scene.attributes.normals[normalIndices[0] + 1],
-                        scene.attributes.normals[normalIndices[0] + 2]),
-                   vec3(scene.attributes.normals[normalIndices[1]],
-                        scene.attributes.normals[normalIndices[1] + 1],
-                        scene.attributes.normals[normalIndices[1] + 2]),
-                   vec3(scene.attributes.normals[normalIndices[2]],
-                        scene.attributes.normals[normalIndices[2] + 1],
-                        scene.attributes.normals[normalIndices[2] + 2])};
+        normals = {vec3(scene.attributes.normals[normalIndices[0] * 3],
+                        scene.attributes.normals[normalIndices[0] * 3 + 1],
+                        scene.attributes.normals[normalIndices[0] * 3 + 2]),
+                   vec3(scene.attributes.normals[normalIndices[1] * 3],
+                        scene.attributes.normals[normalIndices[1] * 3 + 1],
+                        scene.attributes.normals[normalIndices[1] * 3 + 2]),
+                   vec3(scene.attributes.normals[normalIndices[2] * 3],
+                        scene.attributes.normals[normalIndices[2] * 3 + 1],
+                        scene.attributes.normals[normalIndices[2] * 3 + 2])};
       }
 
       int materialIndex = mat_ids[face_id];
@@ -119,6 +135,8 @@ Image Scene::render() {
   fmt::print(fmt::emphasis::bold | fg(fmt::color::blue), "[info] ");
   fmt::println("Starting render");
 
+  AmbientShader shader(*this, {1, 1, 1});
+
   Image img{camera->width, camera->height};
 
   fmt::print(fmt::emphasis::bold | fg(fmt::color::blue), "[info] ");
@@ -130,32 +148,25 @@ Image Scene::render() {
 
       const tinyobj::material_t *mat = nullptr;
       float dist = FLT_MAX;
+      optional<vec3> intersection;
+      Triangle *intersectedFace = nullptr;
       for (auto &face : faces) {
-        if (auto new_intersection = face.intersects(ray, this->camera->pos)) {
-          float new_dist = distance(this->camera->pos, *new_intersection);
+        if ((intersection = face.intersects(ray, this->camera->pos))) {
+          float new_dist = distance(this->camera->pos, *intersection);
           if (dist > new_dist) {
             dist = new_dist;
-            mat = face.material;
+            intersectedFace = &face;
           }
         }
       }
 
-      vec3 color = vec3(0);
-
-      if (mat) {
-        color.r += mat->diffuse[0];
-        color.g += mat->diffuse[1];
-        color.b += mat->diffuse[2];
-      }
+      vec3 color = shader.getColor(ray, intersection, intersectedFace);
 
       // TODO: proper gamma correction
-
-      img.imageData.insert(
-          img.imageData.end(),
-          //{0, static_cast<unsigned char>(intersections * 8), 0});
-          {static_cast<unsigned char>(color.r * 255),
-           static_cast<unsigned char>(color.g * 255),
-           static_cast<unsigned char>(color.b * 255)});
+      img.imageData.insert(img.imageData.end(),
+                           {static_cast<unsigned char>(color.r * 255),
+                            static_cast<unsigned char>(color.g * 255),
+                            static_cast<unsigned char>(color.b * 255)});
     }
   }
 

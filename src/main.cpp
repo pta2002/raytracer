@@ -4,6 +4,7 @@
 #include "image.hpp"
 #include "scene.hpp"
 #include <fmt/core.h>
+#include <nlohmann/json.hpp>
 
 #include <cmath>
 
