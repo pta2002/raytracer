@@ -13,33 +13,32 @@ using namespace glm;
 
 class Triangle {
 public:
-  Triangle() = default;
-  Triangle(array<int, 3> vertices, array<int, 3> normals,
-           array<int, 3> texcoords, int material)
-      : vertexIndices{vertices}, normalIndices{normals},
-        texcoordIndices{texcoords}, material{material} {};
+    Triangle() = default;
+    Triangle(array<vec3, 3> vertices, optional<array<vec3, 3>> normals,
+             vec3 texCoords, const tinyobj::material_t *material);
 
   /**
-   * Indices for the three vertices that make up the triangle.
+   * The three vertices that make up triangle.
    */
-  array<int, 3> vertexIndices;
+  array<vec3, 3> vertices;
+
+  vec3 planeNormal{};
+
   /**
-   * Indices for the three normal vectors for each vertex that
+   * The three normal vectors for each vertex that
    * are needed for interpolated normal calculation in interpolated
    * shading.
    */
-  array<int, 3> normalIndices;
+  std::optional<array<vec3, 3>> normals;
+
   /**
-   * Three dimensional vector describing the normal direction of the
-   * triangle for simple shading.
+   * TODO figure this out, but AFAIK it's an array of vec2's, describing the texture coordinates for each corner
    */
-  array<int, 3> texcoordIndices;
+  vec3 texcoords;
   /**
    *
    */
-  int material;
-
-  array<vec3, 3> getVertices(const tinyobj::attrib_t &attrib);
+  const tinyobj::material_t *material;
 
   /**
    * Checks if a ray intersects the triangle
@@ -47,7 +46,7 @@ public:
    * @param origin The origin point of the ray
    * @return Boolean specifying whether an intersection was detected
    */
-  optional<vec3> intersects(const tinyobj::attrib_t &attrib, vec3 ray, vec3 origin);
+  optional<vec3> intersects(vec3 ray, vec3 origin);
 };
 
 class Geometry {

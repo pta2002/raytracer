@@ -73,10 +73,35 @@ std::optional<Scene> Scene::load(const std::string &filename) {
                                     indices[3 * face_id + 1].texcoord_index,
                                     indices[3 * face_id + 2].texcoord_index};
 
-      int materialIndex = mat_ids[face_id];
+      array<vec3, 3> vertices{
+          vec3(scene.attributes.vertices[normalIndices[0]],
+               scene.attributes.vertices[normalIndices[0] + 1],
+               scene.attributes.vertices[normalIndices[0] + 2]),
+          vec3(scene.attributes.vertices[normalIndices[1]],
+               scene.attributes.vertices[normalIndices[1] + 1],
+               scene.attributes.vertices[normalIndices[1] + 2]),
+          vec3(scene.attributes.vertices[normalIndices[2]],
+               scene.attributes.vertices[normalIndices[2] + 1],
+               scene.attributes.vertices[normalIndices[2] + 2])};
 
-      scene.faces.emplace_back(vertexIndices, normalIndices, texcoordIndices,
-                               materialIndex);
+      std::optional<array<vec3, 3>> normals = {};
+
+      if (normalIndices[0] > 0) {
+        normals = {vec3(scene.attributes.normals[normalIndices[0]],
+                        scene.attributes.normals[normalIndices[0] + 1],
+                        scene.attributes.normals[normalIndices[0] + 2]),
+                   vec3(scene.attributes.normals[normalIndices[1]],
+                        scene.attributes.normals[normalIndices[1] + 1],
+                        scene.attributes.normals[normalIndices[1] + 2]),
+                   vec3(scene.attributes.normals[normalIndices[2]],
+                        scene.attributes.normals[normalIndices[2] + 1],
+                        scene.attributes.normals[normalIndices[2] + 2])};
+      }
+
+      int materialIndex = mat_ids[face_id];
+      const tinyobj::material_t *material = &scene.materials[materialIndex];
+      // TODO: texCoord
+      scene.faces.emplace_back(vertices, normals, vec3(0, 0, 0), material);
     }
   }
 
@@ -106,19 +131,16 @@ Image Scene::render() {
       const tinyobj::material_t *mat = nullptr;
       float dist = FLT_MAX;
       for (auto &face : faces) {
-        if (auto new_intersection =
-                face.intersects(this->attributes, ray, this->camera->pos)) {
+        if (auto new_intersection = face.intersects(ray, this->camera->pos)) {
           float new_dist = distance(this->camera->pos, *new_intersection);
           if (dist > new_dist) {
             dist = new_dist;
-            mat = &materials[face.material];
+            mat = face.material;
           }
         }
       }
+
       vec3 color = vec3(0);
-      for (Light l : this->lights) {
-        color += l.light();
-      }
 
       if (mat) {
         color.r += mat->diffuse[0];
