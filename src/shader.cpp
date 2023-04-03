@@ -6,9 +6,11 @@ vec3 AmbientShader::getColor(vec3 ray, optional<vec3> intersection,
   vec3 color{0};
   if (face) {
     vec3 curLight = ambientLight * dot(-ray, normalize(face->planeNormal));
-    color.r += face->material->diffuse[0] * curLight.r;
-    color.g += face->material->diffuse[1] * curLight.g;
-    color.b += face->material->diffuse[2] * curLight.b;
+    if (face->material) {
+      color.r += face->material->diffuse[0] * curLight.r;
+      color.g += face->material->diffuse[1] * curLight.g;
+      color.b += face->material->diffuse[2] * curLight.b;
+    }
   }
   return color;
 }

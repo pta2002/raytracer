@@ -15,17 +15,35 @@ using namespace tinyobj;
 using namespace glm;
 using std::vector;
 
-class SceneDef {
-public:
-  std::string modelFile;
+SceneDef::SceneDef(const std::string &filename) {
+  std::ifstream js(filename);
+  auto data = nlohmann::json::parse(js);
 
-  explicit SceneDef(const std::string &filename) {
-    std::ifstream js(filename);
-    auto data = nlohmann::json::parse(js);
+  modelFile = data["model"];
+  outputFile = data["output"];
+  width = data["width"];
+  height = data["height"];
 
-    modelFile = data["model"];
+  auto cameraDef = data["frames"][0]["camera"];
+
+  camera = make_shared<Camera>(
+      Camera(width, height, cameraDef["fov"]["x"], cameraDef["fov"]["y"],
+             {cameraDef["up"]["x"], cameraDef["up"]["y"], cameraDef["up"]["z"]},
+             {cameraDef["position"]["x"], cameraDef["position"]["y"],
+              cameraDef["position"]["z"]},
+             {cameraDef["lookingAt"]["x"], cameraDef["lookingAt"]["y"],
+              cameraDef["lookingAt"]["z"]}));
+}
+
+optional<Scene> SceneDef::getScene() {
+  auto ret = Scene::load(modelFile);
+
+  if (ret) {
+    ret.value().setCamera(*camera);
   }
-};
+
+  return ret;
+}
 
 void Scene::info() {
   fmt::println("# of vertices: {}", attributes.vertices.size() / 3);
@@ -52,11 +70,9 @@ void Scene::info() {
 // std::optional<Scene> Scene::load(const std::string &filename, const
 // std::string mats)
 std::optional<Scene> Scene::load(const std::string &filename) {
-  SceneDef def = SceneDef(filename);
-
   ObjReader myObjReader;
 
-  if (!myObjReader.ParseFromFile(def.modelFile)) {
+  if (!myObjReader.ParseFromFile(filename)) {
     return std::nullopt;
   }
 

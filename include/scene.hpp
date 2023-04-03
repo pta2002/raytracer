@@ -41,3 +41,14 @@ public:
 
   Image render();
 };
+
+class SceneDef {
+public:
+  std::string modelFile, outputFile;
+  uint32_t width, height;
+  shared_ptr<Camera> camera;
+
+  explicit SceneDef(const std::string &filename);
+
+  optional<Scene> getScene();
+};

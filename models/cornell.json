@@ -29,5 +29,5 @@
       }
     }
   ],
-  "output": "out/image.png"
+  "output": "image.png"
 }
