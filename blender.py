@@ -10,8 +10,8 @@ lookingAt = cam.matrix_world @ Vector((0, 0, -1))
 cam_dict = {
     "position": {
         "x": cam.location.x,
-        "y": cam.location.y,
-        "z": cam.location.z
+        "y": cam.location.z,
+        "z": -cam.location.y
     },
     # TODO
     "up": {
@@ -21,8 +21,8 @@ cam_dict = {
     },
     "lookingAt": {
         "x": lookingAt.x,
-        "y": lookingAt.y,
-        "z": lookingAt.z
+        "y": lookingAt.z,
+        "z": -lookingAt.y
     },
     # Is this it??
     "fov": {
@@ -32,8 +32,8 @@ cam_dict = {
 }
 
 out = {
-    "title": "Blender scene",
-    "model": "scene.obj",
+    "title": "Cone",
+    "model": "models/cone.obj",
     "width": bpy.context.scene.render.resolution_x,
     "height": bpy.context.scene.render.resolution_y,
     "frames": [{
@@ -45,7 +45,5 @@ out = {
 
 with open("scene.json", "w") as f:
     json.dump(out, f)
-
-bpy.ops.export_scene.obj(filepath="scene.obj")
-
-print("DONE")
+    
+bpy.ops.export_scene.obj(filepath="cone.obj")

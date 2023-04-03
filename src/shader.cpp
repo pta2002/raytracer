@@ -5,7 +5,8 @@ vec3 AmbientShader::getColor(vec3 ray, optional<vec3> intersection,
                              const Triangle *face) {
   vec3 color{0};
   if (face) {
-    vec3 curLight = ambientLight * dot(-ray, normalize(face->planeNormal));
+    vec3 curLight =
+        ambientLight * glm::max(0.2f, dot(-ray, normalize(face->planeNormal)));
     if (face->material) {
       color.r += face->material->diffuse[0] * curLight.r;
       color.g += face->material->diffuse[1] * curLight.g;
