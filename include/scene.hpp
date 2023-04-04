@@ -13,6 +13,12 @@
 
 using namespace glm;
 
+struct Intersection {
+  vec3 ray;
+  optional<vec3> pos;
+  const Triangle *face;
+};
+
 class Scene {
 private:
   std::vector<Triangle> faces;
@@ -38,6 +44,8 @@ public:
   ~Scene();
 
   void setCamera(const Camera &camera);
+
+  Intersection castRay(vec3 origin, vec3 direction) const;
 
   Image render();
 };

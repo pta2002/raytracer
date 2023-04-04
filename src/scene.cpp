@@ -45,27 +45,6 @@ optional<Scene> SceneDef::getScene() {
   return ret;
 }
 
-void Scene::info() {
-  fmt::println("# of vertices: {}", attributes.vertices.size() / 3);
-  fmt::println("# of normals: {}", attributes.normals.size() / 3);
-  fmt::println("# of textCoords: {}", attributes.texcoords.size() / 2);
-  fmt::println("# of shapes: {}", shapes.size());
-  fmt::println("# of materials: {}", materials.size());
-
-  for (auto shape : shapes) {
-    fmt::println("Processing shape {}", shape.name);
-    for (auto vertex : shape.mesh.indices) {
-      for (int vert = 0; vert < 3; vert++) {
-        fmt::print("{} ", vertex.vertex_index);
-      }
-      fmt::println("");
-    }
-    fmt::println("There are {} material indices.",
-                 shape.mesh.material_ids.size());
-    fmt::println("Shape {} has been processed.", shape.name);
-  }
-}
-
 // https://github.com/canmom/rasteriser/blob/master/fileloader.cpp
 // std::optional<Scene> Scene::load(const std::string &filename, const
 // std::string mats)
@@ -118,7 +97,7 @@ std::optional<Scene> Scene::load(const std::string &filename) {
 
       std::optional<array<vec3, 3>> normals = {};
 
-      if (normalIndices[0] > 0) {
+      if (normalIndices[0] >= 0) {
         normals = {vec3(scene.attributes.normals[normalIndices[0] * 3],
                         scene.attributes.normals[normalIndices[0] * 3 + 1],
                         scene.attributes.normals[normalIndices[0] * 3 + 2]),
@@ -131,7 +110,10 @@ std::optional<Scene> Scene::load(const std::string &filename) {
       }
 
       int materialIndex = mat_ids[face_id];
-      const tinyobj::material_t *material = &scene.materials[materialIndex];
+      const tinyobj::material_t *material = nullptr;
+      if (materialIndex >= 0)
+        material = &scene.materials[materialIndex];
+
       // TODO: texCoord
       scene.faces.emplace_back(vertices, normals, vec3(0, 0, 0), material);
     }
@@ -151,7 +133,8 @@ Image Scene::render() {
   fmt::print(fmt::emphasis::bold | fg(fmt::color::blue), "[info] ");
   fmt::println("Starting render");
 
-  AmbientShader shader(*this, {1, 1, 1});
+  //  AmbientShader shader(*this, {1, 1, 1});
+  RayCastShader shader(*this);
 
   Image img{camera->width, camera->height};
 
@@ -162,21 +145,7 @@ Image Scene::render() {
     for (uint32_t x = 0; x < camera->width; x++) {
       auto ray = camera->getRay(x, y);
 
-      const tinyobj::material_t *mat = nullptr;
-      float dist = FLT_MAX;
-      optional<vec3> intersection;
-      Triangle *intersectedFace = nullptr;
-      for (auto &face : faces) {
-        if ((intersection = face.intersects(ray, this->camera->pos))) {
-          float new_dist = distance(this->camera->pos, *intersection);
-          if (dist > new_dist) {
-            dist = new_dist;
-            intersectedFace = &face;
-          }
-        }
-      }
-
-      vec3 color = shader.getColor(ray, intersection, intersectedFace);
+      vec3 color = shader.getColor(castRay(camera->pos, ray));
 
       // TODO: proper gamma correction
       img.imageData.insert(img.imageData.end(),
@@ -190,4 +159,22 @@ Image Scene::render() {
   fmt::println("Finished rendering");
 
   return img;
+}
+
+Intersection Scene::castRay(vec3 origin, vec3 direction) const {
+  float dist = FLT_MAX;
+  optional<vec3> intersection;
+  const Triangle *intersectedFace = nullptr;
+
+  for (auto &face : faces) {
+    if ((intersection = face.intersects(direction, origin))) {
+      float new_dist = distance(origin, *intersection);
+      if (dist > new_dist) {
+        dist = new_dist;
+        intersectedFace = &face;
+      }
+    }
+  }
+
+  return {direction, intersection, intersectedFace};
 }

@@ -10,7 +10,7 @@ Triangle::Triangle(array<vec3, 3> vertices, optional<array<vec3, 3>> normals,
       cross(vertices[1] - vertices[0], vertices[2] - vertices[0]);
 }
 
-optional<vec3> Triangle::intersects(vec3 ray, vec3 origin) {
+optional<vec3> Triangle::intersects(vec3 ray, vec3 origin) const {
   vec3 E1 = vertices[1] - vertices[0];
   vec3 E2 = vertices[2] - vertices[0];
   float det = -dot(ray, planeNormal);
