@@ -21,15 +21,9 @@ struct Intersection {
 
 class Scene {
 private:
-  std::vector<Triangle> faces;
+  std::vector<Object> objects;
 
   const Camera *camera = nullptr;
-
-  void info();
-
-  //  void componentToVec2(const vector<float> &components, vector<vec2> &vecs);
-  //  void componentToVec3(const vector<float> components, vector<vec3> &vecs);
-  //  void loadFaces(shape_t & shape, vector<Triangle> & faces);
 
 public:
   tinyobj::attrib_t attributes;
@@ -45,7 +39,7 @@ public:
 
   void setCamera(const Camera &camera);
 
-  Intersection castRay(vec3 origin, vec3 direction) const;
+  [[nodiscard]] Intersection castRay(vec3 origin, vec3 direction) const;
 
   Image render();
 };

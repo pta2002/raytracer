@@ -20,9 +20,9 @@ vec3 AmbientShader::getColor(const Intersection &intersection) {
 
 vec3 RayCastShader::getColorInternal(const Intersection &intersection, int i) {
   vec3 color{0};
-  int samples = 32;
+  int samples = 8;
 
-  if (i < 2 && intersection.face && intersection.face->material) {
+  if (i < 3 && intersection.face && intersection.face->material) {
     // TODO: We need to get the roughness of the material, and randomize the ray
     // direction
     float roughness = 0.5;

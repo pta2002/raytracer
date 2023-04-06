@@ -6,7 +6,7 @@ project(vi-rt)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS On)
 set(CXX_STANDARD C++20)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -O3")
 
 file(GLOB_RECURSE sources src/**/*.cpp src/*.cpp include/*.hpp)
 

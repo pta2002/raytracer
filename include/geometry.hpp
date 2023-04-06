@@ -45,9 +45,50 @@ public:
    * Checks if a ray intersects the triangle
    * @param ray The ray vector
    * @param origin The origin point of the ray
-   * @return Boolean specifying whether an intersection was detected
+   * @return The intersection point if an intersection was detected. Otherwise, returns empty optional.
    */
-  optional<vec3> intersects(vec3 ray, vec3 origin) const;
+  [[nodiscard]] optional<vec3> intersects(vec3 ray, vec3 origin) const;
+};
+
+class Object {
+private:
+    vec3 minPoint{0}, maxPoint{0};
+public:
+    vector<Triangle> faces;
+
+    /**
+     * Checks if a ray intersects the object's bounding box
+     * @param ray The ray vector
+     * @param origin The origin point of the ray
+     * @param rayInverse Inverse of the ray
+     * @return Whether an intersection was detected
+     */
+    inline bool intersects(vec3 ray, vec3 origin, vec3 rayInverse) const {
+        float tx1 = (minPoint.x - origin.x) * rayInverse.x;
+        float tx2 = (maxPoint.x - origin.x) * rayInverse.x;
+
+        float tmin = std::min(tx1, tx2);
+        float tmax = std::max(tx1, tx2);
+
+        float ty1 = (minPoint.y - origin.y) * rayInverse.y;
+        float ty2 = (maxPoint.y - origin.y) * rayInverse.y;
+
+        tmin = std::max(tmin, std::min(ty1, ty2));
+        tmax = std::min(tmax, std::max(ty1, ty2));
+
+        float tz1 = (minPoint.z - origin.z) * rayInverse.z;
+        float tz2 = (maxPoint.z - origin.z) * rayInverse.z;
+
+        tmin = std::max(tmin, std::min(tz1, tz2));
+        tmax = std::min(tmax, std::max(tz1, tz2));
+
+        return tmax >= tmin;
+    }
+
+    /**
+     * Calculates the bounding box for the object.
+     */
+    void calculateBoundingBox();
 };
 
 class Geometry {
