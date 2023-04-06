@@ -125,6 +125,12 @@ void Scene::setCamera(const Camera &newCamera) { this->camera = &newCamera; }
 
 Scene::~Scene() = default;
 
+void printProgress(int height, int current) {
+    fmt::print(fmt::emphasis::bold | fg(fmt::color::green), "\r[progress] ");
+    fmt::print("{}% done", (float) current / (float) height * 100);
+    fflush(stdout);
+}
+
 Image Scene::render() {
   if (this->camera == nullptr) {
     throw std::runtime_error{"Camera must be set"};
@@ -140,7 +146,7 @@ Image Scene::render() {
 
   fmt::print(fmt::emphasis::bold | fg(fmt::color::blue), "[info] ");
   fmt::println("width: {} height: {}", camera->width, camera->height);
-  int pixel = 0;
+
   for (uint32_t y = 0; y < camera->height; y++) {
     for (uint32_t x = 0; x < camera->width; x++) {
       auto ray = camera->getRay(x, y);
@@ -153,9 +159,11 @@ Image Scene::render() {
                             static_cast<unsigned char>(color.g * 255),
                             static_cast<unsigned char>(color.b * 255)});
     }
+
+    printProgress(camera->height, y);
   }
 
-  fmt::print(fmt::emphasis::bold | fg(fmt::color::blue), "[info] ");
+  fmt::print(fmt::emphasis::bold | fg(fmt::color::blue), "\n[info] ");
   fmt::println("Finished rendering");
 
   return img;
