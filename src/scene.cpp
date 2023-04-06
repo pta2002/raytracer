@@ -158,12 +158,14 @@ Image Scene::render() {
             auto ray = camera->getRay(x, y);
 
             vec3 color = shader.getColor(castRay(camera->pos, ray));
+            color = sqrt(color);
+            color = clamp(color, 0.0f, 0.999f);
 
             // TODO: proper gamma correction
             img.imageData.insert(img.imageData.end(),
-                                 {static_cast<unsigned char>((color.r) * 255),
-                                  static_cast<unsigned char>((color.g) * 255),
-                                  static_cast<unsigned char>((color.b) * 255)});
+                                 {static_cast<unsigned char>(color.r * 256),
+                                  static_cast<unsigned char>(color.g * 256),
+                                  static_cast<unsigned char>(color.b * 256)});
         }
 
         printProgress(camera->height, y);
