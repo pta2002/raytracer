@@ -169,7 +169,7 @@ Intersection Scene::castRay(vec3 origin, vec3 direction) const {
   for (auto &face : faces) {
     if ((intersection = face.intersects(direction, origin))) {
       float new_dist = distance(origin, *intersection);
-      if (dist > new_dist) {
+      if (new_dist > 0 && dist > new_dist) {
         dist = new_dist;
         intersectedFace = &face;
       }
