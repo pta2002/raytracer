@@ -5,7 +5,7 @@
 #include <spng/spng.h>
 
 Image::Image(uint32_t width, uint32_t height) : width{width}, height{height} {
-  imageData.reserve(width * height);
+  imageData.resize(width * height * 3);
 }
 
 bool Image::writePNG(const std::string &filename) {

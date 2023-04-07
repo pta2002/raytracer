@@ -20,26 +20,17 @@ vec3 AmbientShader::getColor(const Intersection &intersection) {
 
 vec3 RayCastShader::getColorInternal(const Intersection &intersection, int i) {
   vec3 color{0};
-  int samples = 8;
+  int samples = i == 0 ? 128 : 1;
 
-  if (i < 3 && intersection.face && intersection.face->material) {
+  if (i < 4 && intersection.face && intersection.face->material) {
     // TODO: We need to get the roughness of the material, and randomize the ray
     // direction
     float roughness = 0.5;
     auto mtl = intersection.face->material;
 
-    if (!mtl) {
-      return color;
-    }
-
-    vec3 newRay = reflect(intersection.ray, intersection.face->planeNormal);
-
     vec3 reflectedColor{0};
     for (int j = 0; j < samples; j++) {
-      // TODO: randomly shift the ray
-      vec3 dir = glm::sphericalRand(1.0);
-      if (dot(dir, intersection.face->planeNormal) <= 0)
-        dir = -dir;
+      vec3 dir = normalize(normalize(intersection.face->planeNormal) + normalize(glm::ballRand<float>(1.0)));
       reflectedColor +=
           getColorInternal(scene.castRay(*intersection.pos, dir), i + 1);
     }

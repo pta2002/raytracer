@@ -55,6 +55,7 @@ private:
     vec3 minPoint{0}, maxPoint{0};
 public:
     vector<Triangle> faces;
+    string name;
 
     /**
      * Checks if a ray intersects the object's bounding box
