@@ -1,6 +1,6 @@
 # Blender v3.5.0 OBJ File: 'Test_2.blend'
 # www.blender.org
-mtllib light.mtl
+mtllib test2.mtl
 o Plane_Plane.001
 v -3.164818 -3.164818 10.000000
 v 3.164818 -3.164818 10.000000
