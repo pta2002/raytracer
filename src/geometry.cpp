@@ -3,7 +3,7 @@
 #include <optional>
 
 Triangle::Triangle(array<vec3, 3> vertices, optional<array<vec3, 3>> normals,
-                   vec3 texCoords, const tinyobj::material_t *material)
+                   vec3 texCoords, const Material *material)
     : vertices{vertices}, normals{normals}, texcoords{texCoords},
       material{material} {
   this->planeNormal =
@@ -27,52 +27,55 @@ optional<vec3> Triangle::intersects(vec3 ray, vec3 origin) const {
   return {};
 }
 
-
-inline __attribute__((always_inline)) void minVertices(vec3 &one, const vec3 &two) {
-    if (two.x < one.x)
-        one.x = two.x;
-    if (two.y < one.y)
-        one.y = two.y;
-    if (two.z < one.z)
-        one.z = two.z;
+inline __attribute__((always_inline)) void minVertices(vec3 &one,
+                                                       const vec3 &two) {
+  if (two.x < one.x)
+    one.x = two.x;
+  if (two.y < one.y)
+    one.y = two.y;
+  if (two.z < one.z)
+    one.z = two.z;
 }
 
-inline __attribute__((always_inline)) void maxVertices(vec3 &one, const vec3 &two) {
-    if (two.x > one.x)
-        one.x = two.x;
-    if (two.y > one.y)
-        one.y = two.y;
-    if (two.z > one.z)
-        one.z = two.z;
+inline __attribute__((always_inline)) void maxVertices(vec3 &one,
+                                                       const vec3 &two) {
+  if (two.x > one.x)
+    one.x = two.x;
+  if (two.y > one.y)
+    one.y = two.y;
+  if (two.z > one.z)
+    one.z = two.z;
 }
 
-inline __attribute__((always_inline)) vec3 minVertex(const array<vec3, 3> &vertices) {
-    vec3 m = vertices[0];
-    for (int i = 1; i < 3; i++) {
-        minVertices(m, vertices[i]);
-    }
+inline __attribute__((always_inline)) vec3
+minVertex(const array<vec3, 3> &vertices) {
+  vec3 m = vertices[0];
+  for (int i = 1; i < 3; i++) {
+    minVertices(m, vertices[i]);
+  }
 
-    return m;
+  return m;
 }
 
-inline __attribute__((always_inline)) vec3 maxVertex(const array<vec3, 3> &vertices) {
-    vec3 m = vertices[0];
-    for (int i = 1; i < 3; i++) {
-        maxVertices(m, vertices[i]);
-    }
+inline __attribute__((always_inline)) vec3
+maxVertex(const array<vec3, 3> &vertices) {
+  vec3 m = vertices[0];
+  for (int i = 1; i < 3; i++) {
+    maxVertices(m, vertices[i]);
+  }
 
-    return m;
+  return m;
 }
 
 void Object::calculateBoundingBox() {
-    minPoint = minVertex(faces[0].vertices);
-    maxPoint = maxVertex(faces[0].vertices);
+  minPoint = minVertex(faces[0].vertices);
+  maxPoint = maxVertex(faces[0].vertices);
 
-    for (int i = 1; i < faces.size(); i++) {
-        vec3 faceMinPoint = minVertex(faces[i].vertices);
-        vec3 faceMaxPoint = maxVertex(faces[i].vertices);
+  for (int i = 1; i < faces.size(); i++) {
+    vec3 faceMinPoint = minVertex(faces[i].vertices);
+    vec3 faceMaxPoint = maxVertex(faces[i].vertices);
 
-        minVertices(minPoint, faceMinPoint);
-        maxVertices(maxPoint, faceMaxPoint);
-    }
+    minVertices(minPoint, faceMinPoint);
+    maxVertices(maxPoint, faceMaxPoint);
+  }
 }

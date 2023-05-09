@@ -28,7 +28,7 @@ private:
 public:
   tinyobj::attrib_t attributes;
   std::vector<tinyobj::shape_t> shapes;
-  std::vector<tinyobj::material_t> materials;
+  std::vector<Material> materials;
   std::vector<Light> lights;
 
   /**

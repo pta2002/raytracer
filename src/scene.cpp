@@ -9,8 +9,8 @@
 
 #include "shader.hpp"
 #include <nlohmann/json.hpp>
-#include <tiny_obj_loader.h>
 #include <omp.h>
+#include <tiny_obj_loader.h>
 
 using namespace tinyobj;
 using namespace glm;
@@ -28,12 +28,12 @@ SceneDef::SceneDef(const std::string &filename) {
   auto cameraDef = data["frames"][0]["camera"];
 
   camera = make_shared<Camera>(
-          Camera(width, height, cameraDef["fov"]["x"], cameraDef["fov"]["y"],
-                 {cameraDef["up"]["x"], cameraDef["up"]["y"], cameraDef["up"]["z"]},
-                 {cameraDef["position"]["x"], cameraDef["position"]["y"],
-                  cameraDef["position"]["z"]},
-                 {cameraDef["lookingAt"]["x"], cameraDef["lookingAt"]["y"],
-                  cameraDef["lookingAt"]["z"]}));
+      Camera(width, height, cameraDef["fov"]["x"], cameraDef["fov"]["y"],
+             {cameraDef["up"]["x"], cameraDef["up"]["y"], cameraDef["up"]["z"]},
+             {cameraDef["position"]["x"], cameraDef["position"]["y"],
+              cameraDef["position"]["z"]},
+             {cameraDef["lookingAt"]["x"], cameraDef["lookingAt"]["y"],
+              cameraDef["lookingAt"]["z"]}));
 }
 
 optional<Scene> SceneDef::getScene() {
@@ -60,9 +60,13 @@ std::optional<Scene> Scene::load(const std::string &filename) {
 
   scene.attributes = myObjReader.GetAttrib();
   scene.shapes = myObjReader.GetShapes();
-  scene.materials = myObjReader.GetMaterials();
+  scene.materials = {};
 
-  for (auto &shape: scene.shapes) {
+  for (auto &material : myObjReader.GetMaterials()) {
+    scene.materials.push_back(material);
+  }
+
+  for (auto &shape : scene.shapes) {
     auto &indices = shape.mesh.indices;
     auto &mat_ids = shape.mesh.material_ids;
 
@@ -88,15 +92,15 @@ std::optional<Scene> Scene::load(const std::string &filename) {
                                     indices[3 * face_id + 2].texcoord_index};
 
       array<vec3, 3> vertices{
-              vec3(scene.attributes.vertices[vertexIndices[0] * 3],
-                   scene.attributes.vertices[vertexIndices[0] * 3 + 1],
-                   scene.attributes.vertices[vertexIndices[0] * 3 + 2]),
-              vec3(scene.attributes.vertices[vertexIndices[1] * 3],
-                   scene.attributes.vertices[vertexIndices[1] * 3 + 1],
-                   scene.attributes.vertices[vertexIndices[1] * 3 + 2]),
-              vec3(scene.attributes.vertices[vertexIndices[2] * 3],
-                   scene.attributes.vertices[vertexIndices[2] * 3 + 1],
-                   scene.attributes.vertices[vertexIndices[2] * 3 + 2])};
+          vec3(scene.attributes.vertices[vertexIndices[0] * 3],
+               scene.attributes.vertices[vertexIndices[0] * 3 + 1],
+               scene.attributes.vertices[vertexIndices[0] * 3 + 2]),
+          vec3(scene.attributes.vertices[vertexIndices[1] * 3],
+               scene.attributes.vertices[vertexIndices[1] * 3 + 1],
+               scene.attributes.vertices[vertexIndices[1] * 3 + 2]),
+          vec3(scene.attributes.vertices[vertexIndices[2] * 3],
+               scene.attributes.vertices[vertexIndices[2] * 3 + 1],
+               scene.attributes.vertices[vertexIndices[2] * 3 + 2])};
 
       std::optional<array<vec3, 3>> normals = {};
 
@@ -113,7 +117,7 @@ std::optional<Scene> Scene::load(const std::string &filename) {
       }
 
       int materialIndex = mat_ids[face_id];
-      const tinyobj::material_t *material = nullptr;
+      const Material *material = nullptr;
       if (materialIndex >= 0)
         material = &scene.materials[materialIndex];
 
@@ -135,7 +139,7 @@ Scene::~Scene() = default;
 
 void printProgress(uint32_t height, uint32_t current) {
   fmt::print(fmt::emphasis::bold | fg(fmt::color::green), "\r[progress] ");
-  fmt::print("{}% done", (float) (current + 1) / (float) height * 100);
+  fmt::print("{}% done", (float)(current + 1) / (float)height * 100);
   fflush(stdout);
 }
 
@@ -163,9 +167,12 @@ Image Scene::render() {
       color = sqrt(color);
       color = clamp(color, 0.0f, 0.999f);
 
-      img.imageData[(y * camera->width + x) * 3] = static_cast<unsigned char>(color.r * 256);
-      img.imageData[(y * camera->width + x) * 3 + 1] = static_cast<unsigned char>(color.g * 256);
-      img.imageData[(y * camera->width + x) * 3 + 2] = static_cast<unsigned char>(color.b * 256);
+      img.imageData[(y * camera->width + x) * 3] =
+          static_cast<unsigned char>(color.r * 256);
+      img.imageData[(y * camera->width + x) * 3 + 1] =
+          static_cast<unsigned char>(color.g * 256);
+      img.imageData[(y * camera->width + x) * 3 + 2] =
+          static_cast<unsigned char>(color.b * 256);
     }
 
     printProgress(camera->height, y);
@@ -184,11 +191,13 @@ Intersection Scene::castRay(vec3 origin, vec3 direction) const {
   const Object *intersectedObj = nullptr;
 
   vec3 rayInverse{1 / direction.x, 1 / direction.y, 1 / direction.z};
-  for (auto &object: objects) {
+  for (auto &object : objects) {
     if (object.intersects(direction, origin, rayInverse)) {
-      for (auto &face: object.faces) {
-        // TODO: We need to filter out objects that are BEHIND the origin, but the question here is... how?
-        // 1. p = the point of the object closest, note- this may not be a vertex...
+      for (auto &face : object.faces) {
+        // TODO: We need to filter out objects that are BEHIND the origin, but
+        // the question here is... how?
+        // 1. p = the point of the object closest, note- this may not be a
+        // vertex...
         // 2. objDir = origin - p
         // 3. dot(direction, objDir) > 0 means that it's in front
         if ((intersection = face.intersects(direction, origin))) {
@@ -204,8 +213,8 @@ Intersection Scene::castRay(vec3 origin, vec3 direction) const {
   }
 
   if (intersectedObj && intersectedObj->name == "Cube.001") {
-    fmt::println("Came from {},{},{}, ray {},{},{}", origin.x, origin.y, origin.z, direction.x, direction.y,
-                 direction.z);
+    fmt::println("Came from {},{},{}, ray {},{},{}", origin.x, origin.y,
+                 origin.z, direction.x, direction.y, direction.z);
   }
 
   return {direction, intersection, intersectedFace};

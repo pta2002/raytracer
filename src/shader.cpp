@@ -30,17 +30,30 @@ vec3 RayCastShader::getColorInternal(const Intersection &intersection, int i) {
 
     vec3 reflectedColor{0};
     for (int j = 0; j < samples; j++) {
-      vec3 dir = normalize(normalize(intersection.face->planeNormal) + normalize(glm::ballRand<float>(1.0)));
+      vec3 dir = normalize(normalize(intersection.face->planeNormal) +
+                           normalize(glm::ballRand<float>(1.0)));
       reflectedColor +=
           getColorInternal(scene.castRay(*intersection.pos, dir), i + 1);
     }
 
     reflectedColor /= samples;
 
-    color.r = reflectedColor.r * mtl->diffuse[0] + mtl->emission[0];
-    color.g = reflectedColor.g * mtl->diffuse[1] + mtl->emission[1];
-    color.b = reflectedColor.b * mtl->diffuse[2] + mtl->emission[2];
+    color = reflectedColor * mtl->diffuse + mtl->emission;
   }
+
+  return color;
+}
+
+vec3 WhittedShader::directLighting(const Intersection &isect,
+                                   const Material &material) {
+  return {};
+}
+
+vec3 WhittedShader::getColor(const Intersection &intersection) {
+  vec3 color{0, 0, 0};
+  auto m = intersection.face->material;
+
+  color += directLighting(intersection, *m);
 
   return color;
 }
