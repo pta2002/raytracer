@@ -222,10 +222,10 @@ Intersection Scene::castRay(vec3 origin, vec3 direction) const {
         // 2. objDir = origin - p
         // 3. dot(direction, objDir) > 0 means that it's in front
         if ((intersection = face.intersects(direction, origin)).has_value()) {
-          finalIntersection = intersection;
           float new_dist = distance(origin, *intersection);
           if (dist > new_dist) {
             dist = new_dist;
+            finalIntersection = intersection;
             intersectedFace = &face;
             intersectedObj = &object;
           }
