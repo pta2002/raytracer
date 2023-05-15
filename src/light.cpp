@@ -2,22 +2,12 @@
 #include <tiny_obj_loader.h>
 #include <vector>
 
-glm::vec3 AmbientLight::light(tinyobj::attrib_t attributes,
-                              tinyobj::material_t material) {
-  return this->rgb;
-}
+LightType Light::lightType() const { return UNDEFINED; }
 
-glm::vec3 AmbientLight::light() { return this->rgb; }
+// Ambinet
+AmbientLight::AmbientLight(vec3 color) : color(color) {}
+LightType AmbientLight::lightType() const { return AMBIENT; }
 
-LightType AmbientLight::lightType() { return AMBIENT; }
-
-LightType Light::lightType() { return UNDEFINED; }
-
-glm::vec3 Light::light(tinyobj::attrib_t attributes,
-                       tinyobj::material_t material) {
-  return glm::vec3(0);
-}
-
-glm::vec3 Light::light() { return glm::vec3(0); }
-
+// Point
 PointLight::PointLight(vec3 pos, vec3 color) : position(pos), color(color) {}
+LightType PointLight::lightType() const { return POINT; }

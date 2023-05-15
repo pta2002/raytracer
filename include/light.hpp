@@ -11,28 +11,20 @@ enum LightType { AMBIENT, POINT, UNDEFINED };
 class Light {
 public:
   Light() = default;
-  ~Light() = default;
+  virtual ~Light() = default;
 
   vec3 rgb{};
 
-  /**
-   * Returns the color of the point as affected by this light source
-   */
-  virtual vec3 light(tinyobj::attrib_t attributes,
-                     tinyobj::material_t material);
-  virtual vec3 light();
-  virtual LightType lightType();
+  [[nodiscard]] virtual LightType lightType() const;
 };
 
 class AmbientLight : public Light {
 public:
-  AmbientLight() = default;
-  ~AmbientLight() = default;
+  vec3 color;
 
-  vec3 light(tinyobj::attrib_t attributes,
-             tinyobj::material_t material) override;
-  vec3 light() override;
-  inline LightType lightType() override { return AMBIENT; };
+  explicit AmbientLight(vec3 color);
+
+  [[nodiscard]] LightType lightType() const override;
 };
 
 class PointLight : public Light {
@@ -41,5 +33,5 @@ public:
   vec3 color;
 
   PointLight(vec3 pos, vec3 color);
-  inline LightType lightType() override { return POINT; };
+  [[nodiscard]] LightType lightType() const override;
 };

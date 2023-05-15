@@ -5,16 +5,15 @@
 #include <fmt/color.h>
 #include <fmt/core.h>
 #include <fstream>
+#include <memory>
 #include <optional>
 
 #include "shader.hpp"
 #include <nlohmann/json.hpp>
-#include <omp.h>
 #include <tiny_obj_loader.h>
 
 using namespace tinyobj;
 using namespace glm;
-using std::vector;
 
 SceneDef::SceneDef(const std::string &filename) {
   std::ifstream js(filename);
@@ -37,48 +36,57 @@ SceneDef::SceneDef(const std::string &filename) {
 
   for (auto &light : data["lights"]) {
     if (light["type"] == "point") {
-      auto l = PointLight(
+      auto l = new PointLight(
           {light["pos"]["x"], light["pos"]["y"], light["pos"]["z"]},
+          {light["color"]["r"], light["color"]["g"], light["color"]["b"]});
+
+      fmt::print(fmt::emphasis::bold | fg(fmt::color::yellow), "[light] ");
+      fmt::println("Loading point light {} {} {}", l->color.x, l->color.y,
+                   l->color.z);
+
+      lights.push_back(l);
+    } else if (light["type"] == "ambient") {
+      auto l = new AmbientLight(
           {light["color"]["r"], light["color"]["g"], light["color"]["b"]});
       lights.push_back(l);
     }
   }
 }
 
-optional<Scene> SceneDef::getScene() {
+optional<unique_ptr<Scene>> SceneDef::getScene() {
   auto ret = Scene::load(modelFile);
 
   if (ret) {
-    ret.value().setCamera(*camera);
-    ret.value().lights = std::move(lights);
+    ret.value()->setCamera(*camera);
+    ret.value()->lights = std::move(lights);
   }
 
-  return ret;
+  return std::move(ret);
 }
 
 // https://github.com/canmom/rasteriser/blob/master/fileloader.cpp
 // std::optional<Scene> Scene::load(const std::string &filename, const
 // std::string mats)
-std::optional<Scene> Scene::load(const std::string &filename) {
+std::optional<unique_ptr<Scene>> Scene::load(const std::string &filename) {
   ObjReader myObjReader;
 
   if (!myObjReader.ParseFromFile(filename)) {
     return std::nullopt;
   }
 
-  Scene scene;
+  auto scene = std::make_unique<Scene>();
 
-  scene.attributes = myObjReader.GetAttrib();
-  scene.shapes = myObjReader.GetShapes();
-  scene.materials = {};
+  scene->attributes = myObjReader.GetAttrib();
+  scene->shapes = myObjReader.GetShapes();
+  scene->materials = {};
 
   // Materials
   for (auto &material : myObjReader.GetMaterials()) {
-    scene.materials.emplace_back(material);
+    scene->materials.emplace_back(material);
   }
 
   // Objects
-  for (auto &shape : scene.shapes) {
+  for (auto &shape : scene->shapes) {
     auto &indices = shape.mesh.indices;
     auto &mat_ids = shape.mesh.material_ids;
 
@@ -104,34 +112,34 @@ std::optional<Scene> Scene::load(const std::string &filename) {
                                     indices[3 * face_id + 2].texcoord_index};
 
       array<vec3, 3> vertices{
-          vec3(scene.attributes.vertices[vertexIndices[0] * 3],
-               scene.attributes.vertices[vertexIndices[0] * 3 + 1],
-               scene.attributes.vertices[vertexIndices[0] * 3 + 2]),
-          vec3(scene.attributes.vertices[vertexIndices[1] * 3],
-               scene.attributes.vertices[vertexIndices[1] * 3 + 1],
-               scene.attributes.vertices[vertexIndices[1] * 3 + 2]),
-          vec3(scene.attributes.vertices[vertexIndices[2] * 3],
-               scene.attributes.vertices[vertexIndices[2] * 3 + 1],
-               scene.attributes.vertices[vertexIndices[2] * 3 + 2])};
+          vec3(scene->attributes.vertices[vertexIndices[0] * 3],
+               scene->attributes.vertices[vertexIndices[0] * 3 + 1],
+               scene->attributes.vertices[vertexIndices[0] * 3 + 2]),
+          vec3(scene->attributes.vertices[vertexIndices[1] * 3],
+               scene->attributes.vertices[vertexIndices[1] * 3 + 1],
+               scene->attributes.vertices[vertexIndices[1] * 3 + 2]),
+          vec3(scene->attributes.vertices[vertexIndices[2] * 3],
+               scene->attributes.vertices[vertexIndices[2] * 3 + 1],
+               scene->attributes.vertices[vertexIndices[2] * 3 + 2])};
 
       std::optional<array<vec3, 3>> normals = {};
 
       if (normalIndices[0] >= 0) {
-        normals = {vec3(scene.attributes.normals[normalIndices[0] * 3],
-                        scene.attributes.normals[normalIndices[0] * 3 + 1],
-                        scene.attributes.normals[normalIndices[0] * 3 + 2]),
-                   vec3(scene.attributes.normals[normalIndices[1] * 3],
-                        scene.attributes.normals[normalIndices[1] * 3 + 1],
-                        scene.attributes.normals[normalIndices[1] * 3 + 2]),
-                   vec3(scene.attributes.normals[normalIndices[2] * 3],
-                        scene.attributes.normals[normalIndices[2] * 3 + 1],
-                        scene.attributes.normals[normalIndices[2] * 3 + 2])};
+        normals = {vec3(scene->attributes.normals[normalIndices[0] * 3],
+                        scene->attributes.normals[normalIndices[0] * 3 + 1],
+                        scene->attributes.normals[normalIndices[0] * 3 + 2]),
+                   vec3(scene->attributes.normals[normalIndices[1] * 3],
+                        scene->attributes.normals[normalIndices[1] * 3 + 1],
+                        scene->attributes.normals[normalIndices[1] * 3 + 2]),
+                   vec3(scene->attributes.normals[normalIndices[2] * 3],
+                        scene->attributes.normals[normalIndices[2] * 3 + 1],
+                        scene->attributes.normals[normalIndices[2] * 3 + 2])};
       }
 
       int materialIndex = mat_ids[face_id];
       const Material *material = nullptr;
       if (materialIndex >= 0)
-        material = &scene.materials[materialIndex];
+        material = &scene->materials[materialIndex];
 
       // TODO: texCoord
       obj.faces.emplace_back(vertices, normals, vec3(0, 0, 0), material);
@@ -139,15 +147,13 @@ std::optional<Scene> Scene::load(const std::string &filename) {
 
     obj.calculateBoundingBox();
     obj.name = shape.name;
-    scene.objects.push_back(obj);
+    scene->objects.push_back(obj);
   }
 
-  return {scene};
+  return {std::move(scene)};
 }
 
 void Scene::setCamera(const Camera &newCamera) { this->camera = &newCamera; }
-
-Scene::~Scene() = default;
 
 void printProgress(uint32_t height, uint32_t current) {
   fmt::print(fmt::emphasis::bold | fg(fmt::color::green), "\r[progress] ");
@@ -175,6 +181,7 @@ Image Scene::render() {
   for (uint32_t y = 0; y < camera->height; y++) {
     for (uint32_t x = 0; x < camera->width; x++) {
       auto ray = camera->getRay(x, y);
+      //      auto ray = camera->getRay(1920 / 2, 0);
 
       vec3 color = shader.getColor(castRay(camera->pos, ray));
       color = sqrt(color);
@@ -200,6 +207,7 @@ Image Scene::render() {
 Intersection Scene::castRay(vec3 origin, vec3 direction) const {
   float dist = FLT_MAX;
   optional<vec3> intersection;
+  optional<vec3> finalIntersection;
   const Triangle *intersectedFace = nullptr;
   const Object *intersectedObj = nullptr;
 
@@ -213,7 +221,8 @@ Intersection Scene::castRay(vec3 origin, vec3 direction) const {
         // vertex...
         // 2. objDir = origin - p
         // 3. dot(direction, objDir) > 0 means that it's in front
-        if ((intersection = face.intersects(direction, origin))) {
+        if ((intersection = face.intersects(direction, origin)).has_value()) {
+          finalIntersection = intersection;
           float new_dist = distance(origin, *intersection);
           if (dist > new_dist) {
             dist = new_dist;
@@ -230,5 +239,31 @@ Intersection Scene::castRay(vec3 origin, vec3 direction) const {
                  origin.z, direction.x, direction.y, direction.z);
   }
 
-  return {direction, intersection, intersectedFace};
+  return {direction, finalIntersection, intersectedFace};
+}
+
+bool Scene::visibility(vec3 origin, vec3 direction, const float maxL) const {
+  vec3 rayInverse{1 / direction.x, 1 / direction.y, 1 / direction.z};
+
+  for (auto &object : objects) {
+    if (object.intersects(direction, origin, rayInverse)) {
+      for (auto &face : object.faces) {
+        auto isect = face.intersects(direction, origin);
+        if (isect) {
+          if (distance(origin, *isect) < maxL) {
+            return false;
+          }
+        }
+      }
+    }
+  }
+
+  return true;
+}
+
+Scene::~Scene() {
+  // Dealocate every light
+  for (auto &light : lights) {
+    delete light;
+  }
 }

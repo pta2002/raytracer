@@ -12,4 +12,5 @@ public:
   vec3 specular{};
   vec3 diffuse{};
   vec3 emission{};
+  vec3 ambient{};
 };

@@ -1,4 +1,5 @@
 #include "shader.hpp"
+#include "light.hpp"
 #include <fmt/core.h>
 #include <glm/gtc/random.hpp>
 
@@ -46,11 +47,54 @@ vec3 RayCastShader::getColorInternal(const Intersection &intersection, int i) {
 
 vec3 WhittedShader::directLighting(const Intersection &isect,
                                    const Material &material) {
-  return {};
+  vec3 color{0, 0, 0};
+
+  for (auto &light : scene.lights) {
+    switch (light->lightType()) {
+    case LightType::AMBIENT:
+      color += material.ambient * dynamic_cast<AmbientLight *>(light)->color;
+      break;
+    case LightType::POINT:
+      if (material.diffuse != vec3(0, 0, 0)) {
+        auto &pointLight = dynamic_cast<const PointLight &>(*light);
+        vec3 lDir = glm::normalize(pointLight.position - *isect.pos);
+        const float lDistance = glm::distance(pointLight.position, *isect.pos);
+
+        // TODO should be shading normal, but don't know where to get that...
+        float cosL = dot(lDir, normalize(isect.face->planeNormal));
+
+        if (cosL > 0) {
+          // Light is NOT behind the primitive
+          vec3 shadowRayOrigin = *isect.pos;
+
+          if (dot(lDir, isect.face->planeNormal) < 0) {
+            shadowRayOrigin -= 0.0001f * isect.face->planeNormal;
+          } else {
+            shadowRayOrigin += 0.0001f * isect.face->planeNormal;
+          }
+
+          if (scene.visibility(shadowRayOrigin, lDir, lDistance - 0.0001f))
+            color += material.diffuse * pointLight.color * cosL;
+        }
+      }
+      break;
+    default:
+      break;
+    }
+  }
+
+  return color;
 }
 
 vec3 WhittedShader::getColor(const Intersection &intersection) {
   vec3 color{0, 0, 0};
+
+  if (!intersection.pos.has_value()) {
+    // We hit the background
+    // TODO: Return background color!
+    return color;
+  }
+
   auto m = intersection.face->material;
 
   color += directLighting(intersection, *m);

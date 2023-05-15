@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  Image img = scene.value().render();
+  Image img = scene.value()->render();
 
   img.writePNG(sceneDef.outputFile);
 }

@@ -29,17 +29,18 @@ public:
   tinyobj::attrib_t attributes;
   std::vector<tinyobj::shape_t> shapes;
   std::vector<Material> materials;
-  std::vector<Light> lights;
+  std::vector<Light *> lights;
 
   /**
    * Loads and creates a scene from a filename
    */
-  static std::optional<Scene> load(const std::string &filename);
+  static std::optional<unique_ptr<Scene>> load(const std::string &filename);
   ~Scene();
 
   void setCamera(const Camera &camera);
 
   [[nodiscard]] Intersection castRay(vec3 origin, vec3 direction) const;
+  [[nodiscard]] bool visibility(vec3 origin, vec3 direction, float L) const;
 
   Image render();
 };
@@ -49,9 +50,9 @@ public:
   std::string modelFile, outputFile;
   uint32_t width, height;
   shared_ptr<Camera> camera;
-  std::vector<Light> lights{};
+  std::vector<Light *> lights{};
 
   explicit SceneDef(const std::string &filename);
 
-  optional<Scene> getScene();
+  optional<unique_ptr<Scene>> getScene();
 };

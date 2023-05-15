@@ -1,6 +1,6 @@
 {
   "title": "Cornell box, static",
-  "model": "models/cornell_box.obj",
+  "model": "models/cornell_box_VI.obj",
   "width": 1920,
   "height": 1080,
   "frames": [
