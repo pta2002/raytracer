@@ -1,24 +1,26 @@
 #pragma once
 
+#include <glm/glm.hpp>
 #include <tiny_obj_loader.h>
 #include <vector>
-#include <glm/glm.hpp>
 
-enum LightType { AMBIENT, UNDEFINED };
+using namespace glm;
+
+enum LightType { AMBIENT, POINT, UNDEFINED };
 
 class Light {
 public:
   Light() = default;
   ~Light() = default;
 
-  glm::vec3 rgb;
+  vec3 rgb{};
 
   /**
    * Returns the color of the point as affected by this light source
    */
-  virtual glm::vec3 light(tinyobj::attrib_t attributes,
-                                   tinyobj::material_t material);
-  virtual glm::vec3 light();
+  virtual vec3 light(tinyobj::attrib_t attributes,
+                     tinyobj::material_t material);
+  virtual vec3 light();
   virtual LightType lightType();
 };
 
@@ -27,8 +29,17 @@ public:
   AmbientLight() = default;
   ~AmbientLight() = default;
 
-  glm::vec3 light(tinyobj::attrib_t attributes,
-                           tinyobj::material_t material) override;
-  glm::vec3 light() override;
-  LightType lightType() override;
+  vec3 light(tinyobj::attrib_t attributes,
+             tinyobj::material_t material) override;
+  vec3 light() override;
+  inline LightType lightType() override { return AMBIENT; };
+};
+
+class PointLight : public Light {
+public:
+  vec3 position;
+  vec3 color;
+
+  PointLight(vec3 pos, vec3 color);
+  inline LightType lightType() override { return POINT; };
 };

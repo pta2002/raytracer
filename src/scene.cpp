@@ -25,7 +25,7 @@ SceneDef::SceneDef(const std::string &filename) {
   width = data["width"];
   height = data["height"];
 
-  auto cameraDef = data["frames"][0]["camera"];
+  auto &cameraDef = data["frames"][0]["camera"];
 
   camera = make_shared<Camera>(
       Camera(width, height, cameraDef["fov"]["x"], cameraDef["fov"]["y"],
@@ -34,6 +34,15 @@ SceneDef::SceneDef(const std::string &filename) {
               cameraDef["position"]["z"]},
              {cameraDef["lookingAt"]["x"], cameraDef["lookingAt"]["y"],
               cameraDef["lookingAt"]["z"]}));
+
+  for (auto &light : data["lights"]) {
+    if (light["type"] == "point") {
+      auto l = PointLight(
+          {light["pos"]["x"], light["pos"]["y"], light["pos"]["z"]},
+          {light["color"]["r"], light["color"]["g"], light["color"]["b"]});
+      lights.push_back(l);
+    }
+  }
 }
 
 optional<Scene> SceneDef::getScene() {
@@ -41,6 +50,7 @@ optional<Scene> SceneDef::getScene() {
 
   if (ret) {
     ret.value().setCamera(*camera);
+    ret.value().lights = std::move(lights);
   }
 
   return ret;
@@ -62,10 +72,12 @@ std::optional<Scene> Scene::load(const std::string &filename) {
   scene.shapes = myObjReader.GetShapes();
   scene.materials = {};
 
+  // Materials
   for (auto &material : myObjReader.GetMaterials()) {
-    scene.materials.push_back(material);
+    scene.materials.emplace_back(material);
   }
 
+  // Objects
   for (auto &shape : scene.shapes) {
     auto &indices = shape.mesh.indices;
     auto &mat_ids = shape.mesh.material_ids;
@@ -152,7 +164,8 @@ Image Scene::render() {
   fmt::println("Starting render");
 
   //  AmbientShader shader(*this, {1, 1, 1});
-  RayCastShader shader(*this);
+  //  RayCastShader shader(*this);
+  WhittedShader shader(*this);
 
   Image img{camera->width, camera->height};
 

@@ -49,6 +49,7 @@ public:
   std::string modelFile, outputFile;
   uint32_t width, height;
   shared_ptr<Camera> camera;
+  std::vector<Light> lights{};
 
   explicit SceneDef(const std::string &filename);
 
