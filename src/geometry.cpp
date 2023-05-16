@@ -21,7 +21,7 @@ optional<vec3> Triangle::intersects(vec3 ray, vec3 origin) const {
   float v = -dot(E1, DAO) * invDet;
   float t = dot(AO, planeNormal) * invDet;
 
-  if (det >= 1e-6 && t >= 0 && u > 0 && v > 0 && u + v <= 1) {
+  if (t >= 0 && u > 0 && v > 0 && u + v <= 1) {
     return {vec3(origin + t * ray)};
   }
   return {};
