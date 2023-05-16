@@ -87,6 +87,15 @@ vec3 WhittedShader::directLighting(const Intersection &isect,
   return color;
 }
 
+vec3 WhittedShader::specularReflection(const Intersection &isect,
+                                       const Material &material) {
+  float cos = dot(normalize(isect.face->planeNormal), isect.ray);
+  vec3 rdir = 2 * cos * isect.face->planeNormal - isect.ray;
+
+  // TODO: ray
+  return {0, 0, 0};
+}
+
 vec3 WhittedShader::getColor(const Intersection &intersection) {
   vec3 color{0, 0, 0};
 
@@ -99,6 +108,7 @@ vec3 WhittedShader::getColor(const Intersection &intersection) {
   auto m = intersection.face->material;
 
   color += directLighting(intersection, *m);
+  color += specularReflection(intersection, *m);
 
   return color;
 }
