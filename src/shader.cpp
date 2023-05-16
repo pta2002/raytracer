@@ -60,7 +60,7 @@ vec3 WhittedShader::directLighting(const Intersection &isect,
         vec3 lDir = glm::normalize(pointLight.position - *isect.pos);
         const float lDistance = glm::distance(pointLight.position, *isect.pos);
 
-        vec3 normal = normalize(isect.face->planeNormal);
+        vec3 normal = *isect.shadingNormal;
         // TODO should be shading normal, but don't know where to get that...
         float cosL = dot(lDir, normal);
 
@@ -89,11 +89,17 @@ vec3 WhittedShader::directLighting(const Intersection &isect,
 
 vec3 WhittedShader::specularReflection(const Intersection &isect,
                                        const Material &material) {
-  float cos = dot(normalize(isect.face->planeNormal), isect.ray);
-  vec3 rdir = 2 * cos * isect.face->planeNormal - isect.ray;
+  vec3 rayDir = reflect(isect.ray, *isect.shadingNormal);
+  vec3 rayOrigin = isect.pos.value();
 
-  // TODO: ray
-  return {0, 0, 0};
+  if (dot(rayDir, *isect.shadingNormal) < 0) {
+    rayOrigin -= 0.0001f * *isect.shadingNormal;
+  } else {
+    rayOrigin += 0.0001f * *isect.shadingNormal;
+  }
+
+  auto intersection = scene.castRay(rayOrigin, rayDir);
+  return getColor(intersection) * material.specular;
 }
 
 vec3 WhittedShader::getColor(const Intersection &intersection) {
@@ -108,7 +114,8 @@ vec3 WhittedShader::getColor(const Intersection &intersection) {
   auto m = intersection.face->material;
 
   color += directLighting(intersection, *m);
-  color += specularReflection(intersection, *m);
+  if (m->specular != vec3(0, 0, 0))
+    color += specularReflection(intersection, *m);
 
   return color;
 }

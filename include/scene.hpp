@@ -16,6 +16,8 @@ using namespace glm;
 struct Intersection {
   vec3 ray;
   optional<vec3> pos;
+  optional<vec3> shadingNormal;
+  optional<vec3> geometricNormal;
   const Triangle *face;
 };
 
