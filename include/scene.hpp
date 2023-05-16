@@ -18,6 +18,7 @@ struct Intersection {
   optional<vec3> pos;
   optional<vec3> shadingNormal;
   optional<vec3> geometricNormal;
+  optional<vec3> lightColor;
   const Triangle *face;
 };
 
@@ -32,6 +33,9 @@ public:
   std::vector<tinyobj::shape_t> shapes;
   std::vector<Material> materials;
   std::vector<Light *> lights;
+
+  float exposure = 1;
+  int samplesPerPixel = 16;
 
   /**
    * Loads and creates a scene from a filename
@@ -53,6 +57,9 @@ public:
   uint32_t width, height;
   shared_ptr<Camera> camera;
   std::vector<Light *> lights{};
+
+  float exposure = 1;
+  int samplesPerPixel = 16;
 
   explicit SceneDef(const std::string &filename);
 

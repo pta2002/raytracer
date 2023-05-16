@@ -214,7 +214,9 @@ vec3 DistributedShader::getColor(const Intersection &intersection) {
     return color;
   }
 
-  // TODO: Check if intersection is light
+  if (intersection.lightColor.has_value()) {
+    return intersection.lightColor.value();
+  }
 
   auto m = intersection.face->material;
 

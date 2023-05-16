@@ -59,6 +59,12 @@ SceneDef::SceneDef(const std::string &filename) {
       lights.push_back(l);
     }
   }
+
+  if (data.contains("exposure"))
+    exposure = data["exposure"];
+
+  if (data.contains("samplesPerPixel"))
+    samplesPerPixel = data["samplesPerPixel"];
 }
 
 optional<unique_ptr<Scene>> SceneDef::getScene() {
@@ -67,6 +73,8 @@ optional<unique_ptr<Scene>> SceneDef::getScene() {
   if (ret) {
     ret.value()->setCamera(*camera);
     ret.value()->lights = std::move(lights);
+    ret.value()->samplesPerPixel = samplesPerPixel;
+    ret.value()->exposure = exposure;
   }
 
   return std::move(ret);
@@ -187,7 +195,6 @@ Image Scene::render() {
   fmt::print(fmt::emphasis::bold | fg(fmt::color::blue), "[info] ");
   fmt::println("width: {} height: {}", camera->width, camera->height);
 
-  const int samplesPerPixel = 4;
   for (uint32_t y = 0; y < camera->height; y++) {
     for (uint32_t x = 0; x < camera->width; x++) {
       vec3 finalColor = {0, 0, 0};
@@ -201,6 +208,7 @@ Image Scene::render() {
       }
 
       finalColor /= samplesPerPixel;
+      finalColor *= exposure;
       finalColor = sqrt(finalColor);
       finalColor = clamp(finalColor, 0.0f, 0.999f);
 
@@ -227,6 +235,7 @@ Intersection Scene::castRay(vec3 origin, vec3 direction) const {
   optional<vec3> finalIntersection;
   optional<vec3> shadingNormal;
   optional<vec3> geometricNormal;
+  optional<vec3> lightColor;
   const Triangle *intersectedFace = nullptr;
   const Object *intersectedObj = nullptr;
 
@@ -253,9 +262,23 @@ Intersection Scene::castRay(vec3 origin, vec3 direction) const {
     }
   }
 
-  if (intersectedObj && intersectedObj->name == "Cube.001") {
-    fmt::println("Came from {},{},{}, ray {},{},{}", origin.x, origin.y,
-                 origin.z, direction.x, direction.y, direction.z);
+  for (auto light : lights) {
+    if (light->lightType() == LightType::AREA) {
+      AreaLight &areaLight = *dynamic_cast<AreaLight *>(light);
+      if ((intersection = areaLight.gem.intersects(direction, origin))
+              .has_value()) {
+        if (!finalIntersection.has_value()) {
+          finalIntersection = intersection;
+          lightColor = areaLight.color;
+        } else {
+          float new_dist = distance(origin, *intersection);
+          if (dist > new_dist) {
+            finalIntersection = intersection;
+            lightColor = areaLight.color;
+          }
+        }
+      }
+    }
   }
 
   if (finalIntersection.has_value()) {
@@ -268,8 +291,8 @@ Intersection Scene::castRay(vec3 origin, vec3 direction) const {
     geometricNormal = normal;
   }
 
-  return {direction, finalIntersection, shadingNormal, geometricNormal,
-          intersectedFace};
+  return {direction,       finalIntersection, shadingNormal,
+          geometricNormal, lightColor,        intersectedFace};
 }
 
 bool Scene::visibility(vec3 origin, vec3 direction, const float maxL) const {
