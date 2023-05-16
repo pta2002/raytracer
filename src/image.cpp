@@ -52,6 +52,8 @@ bool Image::writePNG(const std::string &filename) {
 
   std::fwrite(png_buf, png_size, 1, f);
 
+  free(png_buf);
+
   spng_ctx_free(ctx);
   std::fclose(f);
 

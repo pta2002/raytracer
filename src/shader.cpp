@@ -60,17 +60,18 @@ vec3 WhittedShader::directLighting(const Intersection &isect,
         vec3 lDir = glm::normalize(pointLight.position - *isect.pos);
         const float lDistance = glm::distance(pointLight.position, *isect.pos);
 
+        vec3 normal = normalize(isect.face->planeNormal);
         // TODO should be shading normal, but don't know where to get that...
-        float cosL = dot(lDir, normalize(isect.face->planeNormal));
+        float cosL = dot(lDir, normal);
 
         if (cosL > 0) {
           // Light is NOT behind the primitive
           vec3 shadowRayOrigin = *isect.pos;
 
-          if (dot(lDir, isect.face->planeNormal) < 0) {
-            shadowRayOrigin -= 0.0001f * isect.face->planeNormal;
+          if (dot(lDir, normal) < 0) {
+            shadowRayOrigin -= 0.0001f * normal;
           } else {
-            shadowRayOrigin += 0.0001f * isect.face->planeNormal;
+            shadowRayOrigin += 0.0001f * normal;
           }
 
           if (scene.visibility(shadowRayOrigin, lDir, lDistance - 0.0001f))
