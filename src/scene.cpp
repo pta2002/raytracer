@@ -9,6 +9,7 @@
 #include <optional>
 
 #include "shader.hpp"
+#include <glm/gtc/random.hpp>
 #include <nlohmann/json.hpp>
 #include <tiny_obj_loader.h>
 
@@ -48,6 +49,13 @@ SceneDef::SceneDef(const std::string &filename) {
     } else if (light["type"] == "ambient") {
       auto l = new AmbientLight(
           {light["color"]["r"], light["color"]["g"], light["color"]["b"]});
+      lights.push_back(l);
+    } else if (light["type"] == "area") {
+      auto l = new AreaLight(
+          {light["color"]["r"], light["color"]["g"], light["color"]["b"]},
+          {light["v1"]["x"], light["v1"]["y"], light["v1"]["z"]},
+          {light["v2"]["x"], light["v2"]["y"], light["v2"]["z"]},
+          {light["v3"]["x"], light["v3"]["y"], light["v3"]["z"]});
       lights.push_back(l);
     }
   }
@@ -142,7 +150,7 @@ std::optional<unique_ptr<Scene>> Scene::load(const std::string &filename) {
         material = &scene->materials[materialIndex];
 
       // TODO: texCoord
-      obj.faces.emplace_back(vertices, normals, vec3(0, 0, 0), material);
+      obj.faces.emplace_back(vertices, normals, material);
     }
 
     obj.calculateBoundingBox();
@@ -171,28 +179,37 @@ Image Scene::render() {
 
   //  AmbientShader shader(*this, {1, 1, 1});
   //  RayCastShader shader(*this);
-  WhittedShader shader(*this);
+  //  WhittedShader shader(*this);
+  DistributedShader shader(*this);
 
   Image img{camera->width, camera->height};
 
   fmt::print(fmt::emphasis::bold | fg(fmt::color::blue), "[info] ");
   fmt::println("width: {} height: {}", camera->width, camera->height);
 
+  const int samplesPerPixel = 4;
   for (uint32_t y = 0; y < camera->height; y++) {
     for (uint32_t x = 0; x < camera->width; x++) {
-      auto ray = camera->getRay(x, y);
-      //            auto ray = camera->getRay(1377, 823);
+      vec3 finalColor = {0, 0, 0};
 
-      vec3 color = shader.getColor(castRay(camera->pos, ray));
-      color = sqrt(color);
-      color = clamp(color, 0.0f, 0.999f);
+      for (int i = 0; i < samplesPerPixel; i++) {
+        vec2 jitter = glm::linearRand(vec2(0, 0), vec2(1, 1));
+        auto ray = camera->getRay(x, y, jitter);
+        //  auto ray = camera->getRay(1377, 823);
+
+        finalColor += shader.getColor(castRay(camera->pos, ray));
+      }
+
+      finalColor /= samplesPerPixel;
+      finalColor = sqrt(finalColor);
+      finalColor = clamp(finalColor, 0.0f, 0.999f);
 
       img.imageData[(y * camera->width + x) * 3] =
-          static_cast<unsigned char>(color.r * 256);
+          static_cast<unsigned char>(finalColor.r * 256);
       img.imageData[(y * camera->width + x) * 3 + 1] =
-          static_cast<unsigned char>(color.g * 256);
+          static_cast<unsigned char>(finalColor.g * 256);
       img.imageData[(y * camera->width + x) * 3 + 2] =
-          static_cast<unsigned char>(color.b * 256);
+          static_cast<unsigned char>(finalColor.b * 256);
     }
 
     printProgress(camera->height, y);

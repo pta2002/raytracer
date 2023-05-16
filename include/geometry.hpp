@@ -15,8 +15,10 @@ class Triangle {
 public:
   Triangle() = default;
   Triangle(array<vec3, 3> vertices, optional<array<vec3, 3>> normals,
-           vec3 texCoords, const Material *material);
+           const Material *material);
+  ;
 
+  Triangle(array<vec3, 3> vertices);
   /**
    * The three vertices that make up triangle.
    */
@@ -31,13 +33,7 @@ public:
    */
   std::optional<array<vec3, 3>> normals;
 
-  /**
-   * TODO figure this out, but AFAIK it's an array of vec2's, describing the
-   * texture coordinates for each corner
-   */
-  vec3 texcoords;
-
-  const Material *material;
+  const Material *material = nullptr;
 
   /**
    * Checks if a ray intersects the triangle
@@ -47,6 +43,8 @@ public:
    * returns empty optional.
    */
   [[nodiscard]] optional<vec3> intersects(vec3 ray, vec3 origin) const;
+
+  float area() const;
 };
 
 class Object {

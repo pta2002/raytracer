@@ -3,9 +3,13 @@
 #include <optional>
 
 Triangle::Triangle(array<vec3, 3> vertices, optional<array<vec3, 3>> normals,
-                   vec3 texCoords, const Material *material)
-    : vertices{vertices}, normals{normals}, texcoords{texCoords},
-      material{material} {
+                   const Material *material)
+    : vertices{vertices}, normals{normals}, material{material} {
+  this->planeNormal =
+      cross(vertices[1] - vertices[0], vertices[2] - vertices[0]);
+}
+
+Triangle::Triangle(array<vec3, 3> vertices) : vertices(vertices) {
   this->planeNormal =
       cross(vertices[1] - vertices[0], vertices[2] - vertices[0]);
 }
@@ -25,6 +29,16 @@ optional<vec3> Triangle::intersects(vec3 ray, vec3 origin) const {
     return {vec3(origin + t * ray)};
   }
   return {};
+}
+
+float Triangle::area() const {
+  float a = distance(vertices[0], vertices[1]);
+  float b = distance(vertices[1], vertices[2]);
+  float c = distance(vertices[2], vertices[0]);
+
+  float p = (a + b + c) / 2;
+
+  return sqrt(p * (p - a) * (p - b) * (p - c));
 }
 
 inline __attribute__((always_inline)) void minVertices(vec3 &one,

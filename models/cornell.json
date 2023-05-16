@@ -1,8 +1,8 @@
 {
   "title": "Cornell box, static",
   "model": "models/cornell_box_VI.obj",
-  "width": 1920,
-  "height": 1080,
+  "width": 1280,
+  "height": 720,
   "frames": [
     {
       "frame": 0,
@@ -31,24 +31,26 @@
   ],
   "lights": [
     {
-      "type": "point",
-      "pos": {
+      "type": "area",
+      "v1": {
         "x": 288,
         "y": 508,
-        "z": 282
+        "z": 202
+      },
+      "v2": {
+        "x": 308,
+        "y": 508,
+        "z": 222
+      },
+      "v3": {
+        "x": 268,
+        "y": 508,
+        "z": 222
       },
       "color": {
-        "r": 0.65,
-        "g": 0.65,
-        "b": 0.65
-      }
-    },
-    {
-      "type": "ambient",
-      "color": {
-        "r": 0.03,
-        "g": 0.03,
-        "b": 0.03
+        "r": 0.85,
+        "g": 0.85,
+        "b": 0.85
       }
     }
   ],

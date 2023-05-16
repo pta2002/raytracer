@@ -21,9 +21,9 @@ Camera::Camera(uint32_t width, uint32_t height, double angle_x, double angle_y,
   this->camera2world = {right, up, forward};
 }
 
-glm::vec3 Camera::getRay(uint32_t x, uint32_t y) const {
-  double xs = 2 * (x + 0.5) / width - 1;
-  double ys = 2 * (y + 0.5) / height - 1;
+glm::vec3 Camera::getRay(uint32_t x, uint32_t y, vec2 jitter) const {
+  double xs = 2 * (x + jitter.x) / width - 1;
+  double ys = 2 * (y + jitter.y) / height - 1;
 
   double xc = xs * angle_w;
   double yc = ys * angle_h;
