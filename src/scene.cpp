@@ -1,6 +1,8 @@
 #include "scene.hpp"
 #include "geometry.hpp"
 #include "light.hpp"
+#include "path_tracer_shader.hpp"
+#include "shader.hpp"
 
 #include <fmt/color.h>
 #include <fmt/core.h>
@@ -8,7 +10,6 @@
 #include <memory>
 #include <optional>
 
-#include "shader.hpp"
 #include <glm/gtc/random.hpp>
 #include <nlohmann/json.hpp>
 #include <tiny_obj_loader.h>
@@ -188,7 +189,8 @@ Image Scene::render() {
   //  AmbientShader shader(*this, {1, 1, 1});
   //  RayCastShader shader(*this);
   //  WhittedShader shader(*this);
-  DistributedShader shader(*this);
+  //  DistributedShader shader(*this);
+  PathTracerShader shader(*this);
 
   Image img{camera->width, camera->height};
 

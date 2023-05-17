@@ -3,6 +3,12 @@ Ka 1 1 1
 Kd 1 1 1
 Ks 0 0 0
 
+newmtl glossy_white
+Ka 1 1 1
+Kd 0 0 0
+Ks 1 1 1
+Ns 50
+
 newmtl red
 Ka 1 0 0
 Kd 1 0 0

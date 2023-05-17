@@ -8,7 +8,7 @@
 mtllib cornell_box_VI.mtl
 
 o floor
-usemtl white
+usemtl glossy_white
 v 552.8 0.0 0.0
 v 0.0 0.0 0.0
 v 0.0 0.0 559.2
