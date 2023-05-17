@@ -271,11 +271,13 @@ Intersection Scene::castRay(vec3 origin, vec3 direction) const {
               .has_value()) {
         if (!finalIntersection.has_value()) {
           finalIntersection = intersection;
+          intersectedFace = &areaLight.gem;
           lightColor = areaLight.color;
         } else {
           float new_dist = distance(origin, *intersection);
           if (dist > new_dist) {
             finalIntersection = intersection;
+            intersectedFace = &areaLight.gem;
             lightColor = areaLight.color;
           }
         }

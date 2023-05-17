@@ -1,8 +1,14 @@
 #include "path_tracer_shader.hpp"
 #include "fmt/core.h"
 #include <glm/gtc/random.hpp>
+#define MAX_DEPTH 4
 
 vec3 PathTracerShader::getColor(const Intersection &intersection) {
+  return getColorInternal(intersection, 0);
+}
+
+vec3 PathTracerShader::getColorInternal(const Intersection &intersection,
+                                        int depth) {
   vec3 color{0, 0, 0};
 
   if (!intersection.pos.has_value()) {
@@ -15,11 +21,51 @@ vec3 PathTracerShader::getColor(const Intersection &intersection) {
     return intersection.lightColor.value();
   }
 
-  auto m = intersection.face->material;
+  if (depth < MAX_DEPTH) {
+    auto m = intersection.face->material;
 
-  color += directLighting(intersection, *m);
-  if (m->specular != vec3(0, 0, 0))
-    color += specularReflection(intersection, *m);
+    if (m->specular != vec3(0, 0, 0))
+      color += specularReflection(intersection, *m, depth + 1);
+    if (m->diffuse != vec3(0, 0, 0)) {
+      color += diffuseReflection(intersection, *m, depth + 1);
+      color += directLighting(intersection, *m);
+    }
+  }
+
+  return color;
+}
+
+vec3 PathTracerShader::diffuseReflection(const Intersection &isect,
+                                         const Material &material, int depth) {
+  vec3 color{0, 0, 0};
+  vec2 rand = glm::linearRand(vec2(0, 0), vec2(1, 1));
+  float cosTheta = sqrtf(rand.y);
+  vec3 dAroundZ{cosf(2.f * M_PI * rand.x) * sqrtf(1.f - rand.y),
+                sinf(2.f * M_PI * rand.x) * sqrtf(1.f - rand.y), cosTheta};
+  float pdf = cosTheta / (float)M_PI;
+
+  vec3 rayZ = *isect.shadingNormal;
+  vec3 rayX, rayY;
+  if (abs(rayZ.x) > abs(rayZ.y))
+    rayX = vec3(-rayZ.z, 0, rayZ.x) / sqrtf(rayZ.x * rayZ.x + rayZ.z * rayZ.z);
+  else
+    rayX = vec3(0, rayZ.z, -rayZ.y) / sqrtf(rayZ.y * rayZ.y + rayZ.z * rayZ.z);
+  rayY = cross(rayZ, rayX);
+
+  vec3 rayOrigin = *isect.pos;
+  vec3 rayDir = {
+      dAroundZ.x * rayX.x + dAroundZ.x * rayY.x + dAroundZ.z * rayZ.x,
+      dAroundZ.x * rayX.y + dAroundZ.x * rayY.y + dAroundZ.z * rayZ.y,
+      dAroundZ.x * rayX.z + dAroundZ.x * rayY.z + dAroundZ.z * rayZ.z};
+
+  auto intersection = scene.castRay(rayOrigin, rayDir);
+
+  if (!intersection.lightColor.has_value()) {
+    vec3 rColor = getColorInternal(intersection, depth);
+    // TODO isto dá mal
+    // color = (material.diffuse * rColor * cosTheta) / pdf
+    color = (material.diffuse * rColor);
+  }
 
   return color;
 }
@@ -98,7 +144,7 @@ vec3 PathTracerShader::directLighting(const Intersection &isect,
 }
 
 vec3 PathTracerShader::specularReflection(const Intersection &isect,
-                                          const Material &material) {
+                                          const Material &material, int depth) {
   vec3 rayDir = reflect(isect.ray, *isect.shadingNormal);
   float cosTheta;
 
@@ -136,7 +182,7 @@ vec3 PathTracerShader::specularReflection(const Intersection &isect,
   }
 
   auto intersection = scene.castRay(rayOrigin, rayDir);
-  vec3 color = getColor(intersection);
+  vec3 color = getColorInternal(intersection, depth);
 
   if (material.shininess < 1000) {
     float pdf = (material.shininess + 1.0f) *
