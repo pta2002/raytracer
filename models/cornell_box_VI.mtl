@@ -5,8 +5,8 @@ Ks 0 0 0
 
 newmtl glossy_white
 Ka 1 1 1
-Kd 0 0 0
-Ks 1 1 1
+Kd 0.1 0.1 0.1
+Ks 20 20 3
 Ns 50
 
 newmtl red

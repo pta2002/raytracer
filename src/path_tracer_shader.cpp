@@ -107,18 +107,19 @@ vec3 PathTracerShader::specularReflection(const Intersection &isect,
     cosTheta = powf(rand.y, 1 / (material.shininess + 1));
     float auxRand1 = powf(rand.y, 2 / (material.shininess + 1));
     vec3 sAroundN{
-        cosf(2 * M_PI * rand.x) * sqrtf(1 - auxRand1),
-        sinf(2 * M_PI * rand.x) * sqrtf(1 - auxRand1),
+        cosf(2.f * (float)M_PI * rand.x) * sqrtf(1 - auxRand1),
+        sinf(2.f * (float)M_PI * rand.x) * sqrtf(1 - auxRand1),
         cosTheta,
     };
 
     vec3 rayX, rayY;
-    if (abs(rayDir.x) > abs(rayDir.y))
+    if (abs(rayDir.x) > abs(rayDir.y)) {
       rayX = vec3(-rayDir.z, 0, rayDir.x) /
              sqrtf(rayDir.x * rayDir.x + rayDir.z * rayDir.z);
-    else
+    } else {
       rayX = vec3(0, rayDir.z, -rayDir.y) /
              sqrtf(rayDir.y * rayDir.y + rayDir.z * rayDir.z);
+    }
     rayY = cross(rayDir, rayX);
     rayDir = {sAroundN.x * rayX.x + sAroundN.x * rayY.x + sAroundN.z * rayDir.x,
               sAroundN.x * rayX.y + sAroundN.x * rayY.y + sAroundN.z * rayDir.y,
@@ -139,11 +140,11 @@ vec3 PathTracerShader::specularReflection(const Intersection &isect,
   vec3 color = getColor(intersection);
 
   if (material.shininess < 1000) {
-    float pdf = (material.shininess + 1.0f) *
-                powf(cosTheta, material.shininess) / (2.f * (float)M_PI);
-    color = (material.specular * color *
-             (powf(cosTheta, material.shininess) / (2.f * (float)M_PI))) /
-            pdf;
+    float power = powf(cosTheta, material.shininess) / (2.f * (float)M_PI);
+
+    // TODO: Há um bug aqui, isto está a ficar demasiado escuro
+    float pdf = (material.shininess + 1.0f) * power;
+    color = (material.specular * color * power) / pdf;
   } else {
     color *= material.specular;
   }
