@@ -1,5 +1,7 @@
 #include "path_tracer_shader.hpp"
 #include "fmt/core.h"
+#include <fmt/color.h>
+#include <fstream>
 #include <glm/gtc/random.hpp>
 #define MAX_DEPTH 4
 
@@ -37,12 +39,16 @@ vec3 PathTracerShader::getColorInternal(const Intersection &intersection,
 
 vec3 PathTracerShader::diffuseReflection(const Intersection &isect,
                                          const Material &material, int depth) {
+  if (*isect.shadingNormal == vec3(0, -1, 0) && (*isect.pos).y > 548) {
+    fmt::print(fmt::emphasis::bold | fg(fmt::color::green), "\r[FLAG] ");
+    fmt::print("PROCESSING CEILING");
+  }
   vec3 color{0, 0, 0};
   vec2 rand = glm::linearRand(vec2(0, 0), vec2(1, 1));
   float cosTheta = sqrtf(rand.y);
   vec3 dAroundZ{cosf(2.f * M_PI * rand.x) * sqrtf(1.f - rand.y),
                 sinf(2.f * M_PI * rand.x) * sqrtf(1.f - rand.y), cosTheta};
-  float pdf = cosTheta / (float)M_PI;
+  // float pdf = cosTheta / (float)M_PI;
 
   vec3 rayZ = *isect.shadingNormal;
   vec3 rayX, rayY;
@@ -54,9 +60,9 @@ vec3 PathTracerShader::diffuseReflection(const Intersection &isect,
 
   vec3 rayOrigin = *isect.pos;
   vec3 rayDir = {
-      dAroundZ.x * rayX.x + dAroundZ.x * rayY.x + dAroundZ.z * rayZ.x,
-      dAroundZ.x * rayX.y + dAroundZ.x * rayY.y + dAroundZ.z * rayZ.y,
-      dAroundZ.x * rayX.z + dAroundZ.x * rayY.z + dAroundZ.z * rayZ.z};
+      dAroundZ.x * rayX.x + dAroundZ.y * rayY.x + dAroundZ.z * rayZ.x,
+      dAroundZ.x * rayX.y + dAroundZ.y * rayY.y + dAroundZ.z * rayZ.y,
+      dAroundZ.x * rayX.z + dAroundZ.y * rayY.z + dAroundZ.z * rayZ.z};
 
   auto intersection = scene.castRay(rayOrigin, rayDir);
 
