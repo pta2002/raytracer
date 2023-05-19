@@ -1,9 +1,9 @@
 #include "path_tracer_shader.hpp"
 #include "fmt/core.h"
 #include <fmt/color.h>
-#include <fstream>
 #include <glm/gtc/random.hpp>
 #define MAX_DEPTH 4
+#define CONTINUE_P 0.5f
 
 vec3 PathTracerShader::getColor(const Intersection &intersection) {
   return getColorInternal(intersection, 0);
@@ -23,15 +23,21 @@ vec3 PathTracerShader::getColorInternal(const Intersection &intersection,
     return intersection.lightColor.value();
   }
 
-  if (depth < MAX_DEPTH) {
+  float rnd_russian = ((float)rand()) / ((float)RAND_MAX);
+  if (depth < MAX_DEPTH || rnd_russian < CONTINUE_P) {
     auto m = intersection.face->material;
-
+    vec3 lcolor = vec3(0,0,0);
     if (m->specular != vec3(0, 0, 0))
-      color += specularReflection(intersection, *m, depth + 1);
+      lcolor += specularReflection(intersection, *m, depth + 1);
     if (m->diffuse != vec3(0, 0, 0)) {
-      color += diffuseReflection(intersection, *m, depth + 1);
-      color += directLighting(intersection, *m);
+      lcolor += diffuseReflection(intersection, *m, depth + 1);
+      lcolor += directLighting(intersection, *m);
     }
+
+    if (depth < MAX_DEPTH)
+      color += lcolor;
+    else
+      color += lcolor / CONTINUE_P;
   }
 
   return color;
@@ -39,16 +45,11 @@ vec3 PathTracerShader::getColorInternal(const Intersection &intersection,
 
 vec3 PathTracerShader::diffuseReflection(const Intersection &isect,
                                          const Material &material, int depth) {
-  if (*isect.shadingNormal == vec3(0, -1, 0) && (*isect.pos).y > 548) {
-    fmt::print(fmt::emphasis::bold | fg(fmt::color::green), "\r[FLAG] ");
-    fmt::print("PROCESSING CEILING");
-  }
   vec3 color{0, 0, 0};
   vec2 rand = glm::linearRand(vec2(0, 0), vec2(1, 1));
   float cosTheta = sqrtf(rand.y);
   vec3 dAroundZ{cosf(2.f * M_PI * rand.x) * sqrtf(1.f - rand.y),
                 sinf(2.f * M_PI * rand.x) * sqrtf(1.f - rand.y), cosTheta};
-  // float pdf = cosTheta / (float)M_PI;
 
   vec3 rayZ = *isect.shadingNormal;
   vec3 rayX, rayY;
@@ -68,8 +69,6 @@ vec3 PathTracerShader::diffuseReflection(const Intersection &isect,
 
   if (!intersection.lightColor.has_value()) {
     vec3 rColor = getColorInternal(intersection, depth);
-    // TODO isto dá mal
-    // color = (material.diffuse * rColor * cosTheta) / pdf
     color = (material.diffuse * rColor);
   }
 

@@ -185,6 +185,8 @@ Image Scene::render() {
 
   fmt::print(fmt::emphasis::bold | fg(fmt::color::blue), "[info] ");
   fmt::println("Starting render");
+  fmt::print(fmt::emphasis::bold | fg(fmt::color::blue), "[info] ");
+  fmt::println("spp: {}", this->samplesPerPixel);
 
   //  AmbientShader shader(*this, {1, 1, 1});
   //  RayCastShader shader(*this);
