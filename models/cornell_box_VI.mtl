@@ -5,8 +5,8 @@ Ks 0 0 0
 
 newmtl glossy_white
 Ka 1 1 1
-Kd 0.1 0.1 0.1
-Ks 20 20 3
+Kd 0 0 0
+Ks 1 1 0
 Ns 50
 
 newmtl red
@@ -33,4 +33,4 @@ newmtl mirror_mat
 Ka 0 0 0
 Kd 0 0 0
 Ks 0.9 0.9 0.9
-Ns 10000
+Ns 1000
