@@ -8,8 +8,6 @@
 
 #include <cmath>
 
-#include <OpenImageIO/imageio.h>
-
 int main(int argc, char **argv) {
   // Check command-line arguments
   if (argc != 2) {
