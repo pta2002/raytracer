@@ -203,25 +203,30 @@ Image Scene::render() {
     for (uint32_t x = 0; x < camera->width; x++) {
       vec3 finalColor = {0, 0, 0};
 
+      float finalColorR = 0, finalColorG = 0, finalColorB = 0;
+
+      //#pragma omp parallel for reduction(+:finalColorR)
+      // reduction(+:finalColorG) reduction(+:finalColorB)
       for (int i = 0; i < samplesPerPixel; i++) {
         vec2 jitter = glm::linearRand(vec2(0, 0), vec2(1, 1));
         auto ray = camera->getRay(x, y, jitter);
         //  auto ray = camera->getRay(1377, 823);
 
-        finalColor += shader.getColor(castRay(camera->pos, ray));
+        vec3 color = shader.getColor(castRay(camera->pos, ray));
+        finalColorR += color.r;
+        finalColorG += color.g;
+        finalColorB += color.b;
       }
+
+      finalColor = {finalColorR, finalColorG, finalColorB};
 
       finalColor /= samplesPerPixel;
       finalColor *= exposure;
       finalColor = sqrt(finalColor);
-      finalColor = clamp(finalColor, 0.0f, 0.999f);
 
-      img.imageData[(y * camera->width + x) * 3] =
-          static_cast<unsigned char>(finalColor.r * 256);
-      img.imageData[(y * camera->width + x) * 3 + 1] =
-          static_cast<unsigned char>(finalColor.g * 256);
-      img.imageData[(y * camera->width + x) * 3 + 2] =
-          static_cast<unsigned char>(finalColor.b * 256);
+      img.imageData[(y * camera->width + x) * 3] = finalColor.r;
+      img.imageData[(y * camera->width + x) * 3 + 1] = finalColor.g;
+      img.imageData[(y * camera->width + x) * 3 + 2] = finalColor.b;
     }
 
     printProgress(camera->height, y);
