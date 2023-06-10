@@ -1,5 +1,9 @@
 #pragma once
 
+#include <optional>
+#include "geometry.hpp"
+#include <glm/glm.hpp>
+
 using namespace glm;
 
 struct Intersection {

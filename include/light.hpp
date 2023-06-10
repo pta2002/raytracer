@@ -31,6 +31,18 @@ public:
   [[nodiscard]] virtual vec3 Le(vec3 ray) const = 0;
   [[nodiscard]] virtual vec3 sample(const Intersection &intersection,
                                     const Scene &scene) const = 0;
+
+  /**
+   * @brief Computes the incident radiation from this light at the intersection
+   * @param intersection the intersection where we're sampling the light
+   * @param wi output vector, containing the direction to the light source
+   * @param scene scene, to check visibility
+   * @param pdf probability density function output
+   * @return Incident radiation from the light
+   */
+  [[nodiscard]] virtual vec3 sample_Li(const Intersection &intersection,
+                                       vec3 &wi, const Scene &scene,
+                                       float &pdf) const = 0;
 };
 
 class AmbientLight : public Light {
@@ -44,7 +56,10 @@ public:
 
   // TODO: This is.. probably... wrong
   [[nodiscard]] vec3 sample(const Intersection &intersection,
-                            const Scene &scene) const override { return {}; };
+                            const Scene &scene) const override {
+    return {};
+  };
+  [[nodiscard]] vec3 sample_Li(const Intersection &intersection, vec3 &wi, const Scene &scene, float &pdf) const override;
 };
 
 class PointLight : public Light {
@@ -58,6 +73,9 @@ public:
   [[nodiscard]] vec3 Le(vec3 ray) const override { return vec3{0.0f}; };
   [[nodiscard]] vec3 sample(const Intersection &intersection,
                             const Scene &scene) const override;
+
+  [[nodiscard]] vec3 sample_Li(const Intersection &intersection, vec3 &wi,
+                               const Scene &scene, float &pdf) const override;
 };
 
 class AreaLight : public Light {
@@ -74,4 +92,7 @@ public:
   [[nodiscard]] vec3 Le(vec3 ray) const override { return vec3{0.0f}; };
   [[nodiscard]] vec3 sample(const Intersection &intersection,
                             const Scene &scene) const override;
+
+  [[nodiscard]] vec3 sample_Li(const Intersection &intersection, vec3 &wi,
+                               const Scene &scene, float &pdf) const override { return {};};
 };

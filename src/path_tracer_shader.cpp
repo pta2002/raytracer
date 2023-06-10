@@ -1,4 +1,5 @@
 #include "path_tracer_shader.hpp"
+#include "bsdf.hpp"
 #include "fmt/core.h"
 #include "ray.hpp"
 #include <fmt/color.h>
@@ -6,12 +7,13 @@
 #define MAX_DEPTH 4
 #define CONTINUE_P 0.5f
 
-vec3 PathTracerShader::getColor(const Intersection &intersection) {
+vec3 PathTracerShader::getColor(const Intersection &isect) {
   //  return getColorInternal(intersection, 0);
   // https://www.pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Path_Tracing
   vec3 color{0.f}, beta{1.f};
   bool specularBounce = false;
-  Ray ray(intersection.source, intersection.ray);
+  Ray ray(isect.source, isect.ray);
+  auto intersection = isect;
 
   for (int bounces = 0;; ++bounces) {
     bool foundIntersection = intersection.pos.has_value();
@@ -33,26 +35,55 @@ vec3 PathTracerShader::getColor(const Intersection &intersection) {
       break;
 
     // TODO: It's best to only sample one light * n of lights
-    for (const auto &light : scene.lights) {
-      color += beta * light->sample(intersection, scene);
-    }
+    BSDF bsdf(intersection);
+    color += beta * uniformSampleAllLights(intersection, bsdf);
 
     vec3 wo = -ray.direction, wi;
     float pdf;
-    BxDFType flags;
-    vec3 f = intersection.face->material->sampleF(wo, wi, pdf, flags);
+    vec3 f = bsdf.sampleF(wo, wi, pdf);
 
     if (f == vec3{0.f} || pdf == 0.f)
       break;
     beta *= f * abs(dot(wi, *intersection.shadingNormal)) / pdf;
-    specularBounce = (flags & BSDF_SPECULAR) != 0;
+    specularBounce = true;
     ray = Ray(*intersection.pos, wi);
+    ray.adjustOrigin(*intersection.shadingNormal);
+    intersection = scene.castRay(ray.origin, ray.direction);
   }
 
   return color;
 }
 
-vec3 PathTracerShader::getColorInternal(const Intersection &intersection,
+vec3 PathTracerShader::uniformSampleAllLights(const Intersection &intersection,
+                                              const BSDF &bsdf) const {
+  vec3 color{0.f};
+
+  for (auto light : scene.lights) {
+    color += estimateDirect(intersection, *light, bsdf);
+  }
+
+  return color;
+}
+
+vec3 PathTracerShader::estimateDirect(const Intersection &intersection, const Light &light, const BSDF &bsdf) const {
+  vec3 ld{.0f};
+  vec3 wi;
+  float lightPdf = 0.f, scatteringPdf = 0.f;
+  vec3 li = light.sample_Li(intersection, wi, scene, lightPdf);
+  if (lightPdf > 0 && li != vec3{.0f}) {
+    vec3 f = bsdf.f(-intersection.ray, wi) * abs(dot(wi, *intersection.shadingNormal));
+    scatteringPdf = intersection.face->material->pdf(-intersection.ray, wi);
+
+    // TODO: might need to check occlusion here?
+    if (li != vec3{0.f}) {
+      ld += f * li / lightPdf;
+    }
+  }
+
+  return ld;
+}
+
+/*vec3 PathTracerShader::getColorInternal(const Intersection &intersection,
                                         int depth) {
   vec3 color{0, 0, 0};
 
@@ -113,7 +144,7 @@ vec3 PathTracerShader::getColorInternal(const Intersection &intersection,
   return color;
 }
 
-/**
+*//**
  * cosTheta = dot (h, v)
  * h = (l + v) / ||l + v||
  *
@@ -121,7 +152,7 @@ vec3 PathTracerShader::getColorInternal(const Intersection &intersection,
  * l is the light vector, aka lightDir, aka normalize(lightPos - isect.por)
  *
  * ior is the index of refraction, material.ior
- */
+ *//*
 vec3 fresnelSchlick(float cosTheta, vec3 f0) {
   return f0 + (vec3{1.0f} - f0) * powf(1 - cosTheta, 5);
 }
@@ -352,3 +383,4 @@ vec3 PathTracerShader::specularReflection(const Intersection &isect,
 
   return color;
 }
+*/

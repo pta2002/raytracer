@@ -18,7 +18,7 @@ public:
            const Material *material);
   ;
 
-  Triangle(array<vec3, 3> vertices);
+  explicit Triangle(array<vec3, 3> vertices);
   /**
    * The three vertices that make up triangle.
    */

@@ -18,7 +18,7 @@ FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
 FetchContent_MakeAvailable(json)
 
-add_executable(vi-rt ${sources})
+add_executable(vi-rt ${sources} include/helpers.hpp)
 
 find_package(OpenMP)
 if (OpenMP_CXX_FOUND)
