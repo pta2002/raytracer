@@ -188,10 +188,6 @@ Image Scene::render() {
   fmt::print(fmt::emphasis::bold | fg(fmt::color::blue), "[info] ");
   fmt::println("spp: {}", this->samplesPerPixel);
 
-  //  AmbientShader shader(*this, {1, 1, 1});
-  //  RayCastShader shader(*this);
-  //  WhittedShader shader(*this);
-  //  DistributedShader shader(*this);
   PathTracerShader shader(*this);
 
   Image img{camera->width, camera->height};
