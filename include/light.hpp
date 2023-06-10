@@ -1,10 +1,14 @@
 #pragma once
 
 #include "geometry.hpp"
+#include "intersection.hpp"
 #include <glm/glm.hpp>
 #include <memory>
 #include <tiny_obj_loader.h>
 #include <vector>
+
+// Forward declaration to avoid circular dependency hell :(
+class Scene;
 
 using namespace glm;
 
@@ -18,6 +22,15 @@ public:
   vec3 rgb{};
 
   [[nodiscard]] virtual LightType lightType() const;
+
+  /**
+   * @brief Environment lighting component, when viewed with direction _ray_.
+   * @param ray direction looking at the light
+   * @return intensity when viewed from ray
+   */
+  [[nodiscard]] virtual vec3 Le(vec3 ray) const = 0;
+  [[nodiscard]] virtual vec3 sample(const Intersection &intersection,
+                                    const Scene &scene) const = 0;
 };
 
 class AmbientLight : public Light {
@@ -27,15 +40,24 @@ public:
   explicit AmbientLight(vec3 color);
 
   [[nodiscard]] LightType lightType() const override;
+  [[nodiscard]] vec3 Le(vec3 ray) const override { return color; };
+
+  // TODO: This is.. probably... wrong
+  [[nodiscard]] vec3 sample(const Intersection &intersection,
+                            const Scene &scene) const override { return {}; };
 };
 
 class PointLight : public Light {
 public:
   vec3 position;
   vec3 color;
+  float intensity{1.0f};
 
-  PointLight(vec3 pos, vec3 color);
+  PointLight(vec3 pos, vec3 color, float intensity);
   [[nodiscard]] LightType lightType() const override;
+  [[nodiscard]] vec3 Le(vec3 ray) const override { return vec3{0.0f}; };
+  [[nodiscard]] vec3 sample(const Intersection &intersection,
+                            const Scene &scene) const override;
 };
 
 class AreaLight : public Light {
@@ -49,4 +71,7 @@ public:
   AreaLight(vec3 color, vec3 v1, vec3 v2, vec3 v3);
   [[nodiscard]] LightType lightType() const override;
   [[nodiscard]] vec3 sampleLight(vec2 rand) const;
+  [[nodiscard]] vec3 Le(vec3 ray) const override { return vec3{0.0f}; };
+  [[nodiscard]] vec3 sample(const Intersection &intersection,
+                            const Scene &scene) const override;
 };

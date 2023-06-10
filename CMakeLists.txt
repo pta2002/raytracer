@@ -25,6 +25,9 @@ if (OpenMP_CXX_FOUND)
     target_link_libraries(vi-rt OpenMP::OpenMP_CXX)
 endif ()
 
+set(ZLIB_LIBRARY ENV{ZLIB_LIBRARY})
+set(ZLIB_INCLUDE_DIR ENV{ZLIB_INCLUDE_DIR})
+
 find_package(OpenImageIO REQUIRED)
 
 target_link_libraries(vi-rt nlohmann_json::nlohmann_json)

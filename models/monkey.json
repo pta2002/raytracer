@@ -42,7 +42,15 @@
         "g": 1.0,
         "b": 1.0
       },
-      "power": 1000.0
+      "power": 20.0
+    },
+    {
+      "type": "ambient",
+      "color": {
+        "r": 0.1,
+        "g": 0.1,
+        "b": 0.1
+      }
     }
   ],
   "output": "image.png"

@@ -40,7 +40,8 @@ SceneDef::SceneDef(const std::string &filename) {
     if (light["type"] == "point") {
       auto l = new PointLight(
           {light["pos"]["x"], light["pos"]["y"], light["pos"]["z"]},
-          {light["color"]["r"], light["color"]["g"], light["color"]["b"]});
+          {light["color"]["r"], light["color"]["g"], light["color"]["b"]},
+          light["power"]);
 
       fmt::print(fmt::emphasis::bold | fg(fmt::color::yellow), "[light] ");
       fmt::println("Loading point light {} {} {}", l->color.x, l->color.y,
@@ -48,8 +49,7 @@ SceneDef::SceneDef(const std::string &filename) {
 
       lights.push_back(l);
     } else if (light["type"] == "ambient") {
-      auto l = new AmbientLight(
-          {light["color"]["r"], light["color"]["g"], light["color"]["b"]});
+      auto l = new AmbientLight({light["color"]["r"], light["color"]["g"], light["color"]["b"]});
       lights.push_back(l);
     } else if (light["type"] == "area") {
       auto l = new AreaLight(
@@ -205,8 +205,8 @@ Image Scene::render() {
 
       float finalColorR = 0, finalColorG = 0, finalColorB = 0;
 
-      //#pragma omp parallel for reduction(+:finalColorR)
-      // reduction(+:finalColorG) reduction(+:finalColorB)
+      // #pragma omp parallel for reduction(+:finalColorR)
+      //  reduction(+:finalColorG) reduction(+:finalColorB)
       for (int i = 0; i < samplesPerPixel; i++) {
         vec2 jitter = glm::linearRand(vec2(0, 0), vec2(1, 1));
         auto ray = camera->getRay(x, y, jitter);
@@ -222,7 +222,8 @@ Image Scene::render() {
 
       finalColor /= samplesPerPixel;
       finalColor *= exposure;
-      finalColor = sqrt(finalColor);
+      finalColor /= finalColor + vec3{1.0};
+      finalColor = glm::pow(finalColor, vec3(1 / 2.2f));
 
       img.imageData[(y * camera->width + x) * 3] = finalColor.r;
       img.imageData[(y * camera->width + x) * 3 + 1] = finalColor.g;
@@ -302,8 +303,8 @@ Intersection Scene::castRay(vec3 origin, vec3 direction) const {
     geometricNormal = normal;
   }
 
-  return {direction,       finalIntersection, shadingNormal,
-          geometricNormal, lightColor,        intersectedFace};
+  return {direction,       origin,     finalIntersection, shadingNormal,
+          geometricNormal, lightColor, intersectedFace};
 }
 
 bool Scene::visibility(vec3 origin, vec3 direction, const float maxL) const {

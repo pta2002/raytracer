@@ -9,7 +9,7 @@ private:
                          int depth);
   vec3 specularReflection(const Intersection &isect, const Material &material,
                           int depth);
-  vec3 directLighting(const Intersection &isect, const Material &material);
+  vec3 lightRadiance(const Intersection &isect, const Material &material);
   vec3 getColorInternal(const Intersection &intersection, int depth);
 
 public:
