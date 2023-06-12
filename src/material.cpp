@@ -195,8 +195,8 @@ vec3 Material::sampleF(vec3 wo, vec3 &wi, float &pdf) const {
   const vec2 u = linearRand(vec2{0.f}, vec2{1.f});
 
   const vec3 wh = sample_wh(wo, u);
-  wi = reflect(wo, wh);
-  //  if (!sameHemisphere(wo, wi)) return vec3{0.f};
+  wi = reflect(-wo, wh);
+    if (!sameHemisphere(wo, wi)) return vec3{0.f};
   pdf = this->distPdf(wo, wh) / (4.f * dot(wo, wh));
 
   return f(wo, wi);

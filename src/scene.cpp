@@ -49,7 +49,8 @@ SceneDef::SceneDef(const std::string &filename) {
 
       lights.push_back(l);
     } else if (light["type"] == "ambient") {
-      auto l = new AmbientLight({light["color"]["r"], light["color"]["g"], light["color"]["b"]});
+      auto l = new AmbientLight(
+          {light["color"]["r"], light["color"]["g"], light["color"]["b"]});
       lights.push_back(l);
     } else if (light["type"] == "area") {
       auto l = new AreaLight(
@@ -205,8 +206,8 @@ Image Scene::render() {
       //  reduction(+:finalColorG) reduction(+:finalColorB)
       for (int i = 0; i < samplesPerPixel; i++) {
         vec2 jitter = glm::linearRand(vec2(0, 0), vec2(1, 1));
-        auto ray = camera->getRay(x, y, jitter);
-//          auto ray = camera->getRay(303, 395, jitter);
+                auto ray = camera->getRay(x, y, jitter);
+//        auto ray = camera->getRay(321, 149, jitter);
 
         vec3 color = shader.getColor(castRay(camera->pos, ray));
         finalColorR += color.r;

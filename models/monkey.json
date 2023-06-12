@@ -1,6 +1,7 @@
 {
   "title": "Cone",
   "model": "models/monkey.obj",
+  "samplesPerPixel": 64,
   "width": 960,
   "height": 540,
   "frames": [
@@ -47,9 +48,9 @@
     {
       "type": "ambient",
       "color": {
-        "r": 0.1,
-        "g": 0.1,
-        "b": 0.1
+        "r": 0.051,
+        "g": 0.051,
+        "b": 0.051
       }
     }
   ],
