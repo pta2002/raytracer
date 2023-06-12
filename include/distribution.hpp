@@ -6,6 +6,7 @@ using namespace glm;
 
 class Distribution {
 public:
+  virtual ~Distribution() = default;
   /**
    * @brief Basic distribution of normals function.
    * @param wh Half-vector
@@ -22,6 +23,13 @@ public:
   [[nodiscard]] virtual float g(vec3 wo, vec3 wi) const = 0;
 
   /**
+   * @brief not sure tbh
+   * @param w vector
+   * @return Geometry masking function
+   */
+  [[nodiscard]] virtual float g1(vec3 w) const = 0;
+
+  /**
    * @brief Probability derivation function
    * @param wo Outgoing vector
    * @param wh Half-vector
@@ -35,5 +43,5 @@ public:
    * @param u Random numbers in [0,1[
    * @return Sampled half vector for this distribution
    */
-  [[nodiscard]] virtual float sample_wh(vec3 wo, vec2 u) const = 0;
+  [[nodiscard]] virtual vec3 sample_wh(vec3 wo, vec2 u) const = 0;
 };

@@ -96,7 +96,6 @@ std::optional<unique_ptr<Scene>> Scene::load(const std::string &filename) {
 
   scene->attributes = myObjReader.GetAttrib();
   scene->shapes = myObjReader.GetShapes();
-  scene->materials = {};
 
   // Materials
   for (auto &material : myObjReader.GetMaterials()) {
@@ -206,8 +205,8 @@ Image Scene::render() {
       //  reduction(+:finalColorG) reduction(+:finalColorB)
       for (int i = 0; i < samplesPerPixel; i++) {
         vec2 jitter = glm::linearRand(vec2(0, 0), vec2(1, 1));
-                auto ray = camera->getRay(x, y, jitter);
-//        auto ray = camera->getRay(321, 149, jitter);
+        auto ray = camera->getRay(x, y, jitter);
+        //        auto ray = camera->getRay(321, 149, jitter);
 
         vec3 color = shader.getColor(castRay(camera->pos, ray));
         finalColorR += color.r;

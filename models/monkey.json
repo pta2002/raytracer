@@ -1,7 +1,7 @@
 {
   "title": "Cone",
   "model": "models/monkey.obj",
-  "samplesPerPixel": 64,
+  "samplesPerPixel": 16,
   "width": 960,
   "height": 540,
   "frames": [

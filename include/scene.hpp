@@ -2,8 +2,8 @@
 
 #include "camera.hpp"
 #include "geometry.hpp"
-#include "intersection.hpp"
 #include "image.hpp"
+#include "intersection.hpp"
 #include "light.hpp"
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
@@ -23,7 +23,7 @@ private:
 public:
   tinyobj::attrib_t attributes;
   std::vector<tinyobj::shape_t> shapes;
-  std::vector<Material> materials;
+  std::vector<Material> materials{};
   std::vector<Light *> lights;
 
   float exposure = 1;
