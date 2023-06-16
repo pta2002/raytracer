@@ -1,5 +1,6 @@
 #include "material.hpp"
-#include "distributions/beckmann.hpp"
+#include "distributions/ggx.hpp"
+#include "fmt/core.h"
 #include "helpers.hpp"
 
 #include <glm/gtc/random.hpp>
@@ -43,7 +44,7 @@ Material::Material(const tinyobj::material_t &material) {
   this->f0 = f0 * f0;
   this->f0 = mix(f0, albedo, metallic);
 
-  dist = std::make_shared<BeckmannDistribution>(roughness);
+  dist = std::make_shared<GGXDistribution>(roughness);
 }
 
 vec3 fresnelSchlick(float cosTheta, vec3 f0) {
@@ -81,7 +82,7 @@ vec3 Material::sampleF(vec3 wo, vec3 &wi, float &pdf) const {
   const vec2 u = linearRand(vec2{0.f}, vec2{1.f});
 
   const vec3 wh = dist->sample_wh(wo, u);
-  wi = reflect(-wo, wh);
+  wi = 2 * abs(dot(wo, wh)) * wh - wo;
   if (!sameHemisphere(wo, wi))
     return vec3{0.f};
   pdf = this->dist->pdf(wo, wh) / (4.f * dot(wo, wh));

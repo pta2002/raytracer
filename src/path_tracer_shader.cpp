@@ -42,6 +42,9 @@ vec3 PathTracerShader::getColor(const Intersection &isect) {
     float pdf;
     vec3 f = bsdf.sampleF(wo, wi, pdf);
 
+    color = wi;
+    break;
+
     if (f == vec3{0.f} || pdf == 0.f)
       break;
     beta *= f * abs(dot(wi, *intersection.shadingNormal)) / pdf;
@@ -65,13 +68,16 @@ vec3 PathTracerShader::uniformSampleAllLights(const Intersection &intersection,
   return color;
 }
 
-vec3 PathTracerShader::estimateDirect(const Intersection &intersection, const Light &light, const BSDF &bsdf) const {
+vec3 PathTracerShader::estimateDirect(const Intersection &intersection,
+                                      const Light &light,
+                                      const BSDF &bsdf) const {
   vec3 ld{.0f};
   vec3 wi;
   float lightPdf = 0.f, scatteringPdf = 0.f;
   vec3 li = light.sample_Li(intersection, wi, scene, lightPdf);
   if (lightPdf > 0 && li != vec3{.0f}) {
-    vec3 f = bsdf.f(-intersection.ray, wi) * abs(dot(wi, *intersection.shadingNormal));
+    vec3 f = bsdf.f(-intersection.ray, wi) *
+             abs(dot(wi, *intersection.shadingNormal));
     scatteringPdf = intersection.face->material->pdf(-intersection.ray, wi);
 
     // TODO: might need to check occlusion here?

@@ -16,12 +16,12 @@ public:
    */
   explicit BeckmannDistribution(float roughness);
 
-  vec3 sample_wh(vec3 wo, vec2 u) const override;
-  float d(vec3 wh) const override;
-  float g(vec3 wo, vec3 wi) const override;
-  float g1(vec3 w) const override;
-  float pdf(vec3 wo, vec3 wh) const override;
+  [[nodiscard]] vec3 sample_wh(vec3 wo, vec2 u) const override;
+  [[nodiscard]] float d(vec3 wh) const override;
+  [[nodiscard]] float g(vec3 wo, vec3 wi) const override;
+  [[nodiscard]] float g1(vec3 w) const override;
+  [[nodiscard]] float pdf(vec3 wo, vec3 wh) const override;
 
 private:
-  float lambda(vec3 w) const;
+  [[nodiscard]] float lambda(vec3 w) const;
 };
