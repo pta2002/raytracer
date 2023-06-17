@@ -29,9 +29,16 @@ vec3 GGXDistribution::sample_wh(vec3 wo, vec2 u) const {
 
 float GGXDistribution::pdf(vec3 wo, vec3 wh) const { return d(wh) * wh.y; }
 
-float GGXDistribution::g(vec3 wo, vec3 wi) const { return 1; }
+float GGXDistribution::g(vec3 wo, vec3 wi) const {
+  return g1(wo) * g1(wi);
+}
 
-float GGXDistribution::g1(vec3 w) const { return 1; }
+float GGXDistribution::g1(vec3 w) const {
+  float NdotV = w.y;
+  float nom = NdotV;
+  float denom = NdotV * (1.0f - roughness) + roughness;
+  return nom / denom;
+}
 
 float GGXDistribution::d(vec3 wh) const {
   float a2 = roughness*roughness;
