@@ -42,8 +42,8 @@ vec3 PathTracerShader::getColor(const Intersection &isect) {
     float pdf;
     vec3 f = bsdf.sampleF(wo, wi, pdf);
 
-    color = wi;
-    break;
+//    color = wi;
+//    break;
 
     if (f == vec3{0.f} || pdf == 0.f)
       break;

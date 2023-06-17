@@ -4,15 +4,16 @@
 using namespace glm;
 
 BSDF::BSDF(const Intersection &intersection) {
-  ns = *intersection.shadingNormal;
-  ss = normalize(intersection.face->vertices[1] -
-                 intersection.face->vertices[0]);
-  ts = cross(ns, ss);
+  ns = normalize(intersection.face->planeNormal);
+  ss = normalize(intersection.face->tangent);
+  ts = normalize(intersection.face->bitangent);
 
-  if (ns != intersection.face->planeNormal) {
+  if (*intersection.shadingNormal != ns) {
     ss = -ss;
     ts = -ts;
+    ns = -ns;
   }
+
   material = intersection.face->material;
   geometricNormal = *intersection.geometricNormal;
 }
@@ -22,9 +23,9 @@ vec3 BSDF::worldToLocal(vec3 v) const {
 }
 
 vec3 BSDF::localToWorld(vec3 v) const {
-  return vec3{ss.x * v.x + ts.x * v.y + ns.x * v.z,
-              ss.y * v.x + ts.y * v.y + ns.y * v.z,
-              ss.z * v.x + ts.z * v.y + ns.z * v.z};
+  return vec3{ss.x * v.x + ns.x * v.y + ts.x * v.z,
+              ss.y * v.x + ns.y * v.y + ts.y * v.z,
+              ss.z * v.x + ns.z * v.y + ts.z * v.z};
 }
 
 vec3 BSDF::f(vec3 woWorld, vec3 wiWorld) const {

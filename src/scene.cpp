@@ -153,13 +153,25 @@ std::optional<unique_ptr<Scene>> Scene::load(const std::string &filename) {
                         scene->attributes.normals[normalIndices[2] * 3 + 2])};
       }
 
+      std::optional<array<vec2, 3>> texcoords = {};
+      if (texcoordIndices[0] >= 0) {
+        texcoords = {
+          vec2(scene->attributes.texcoords[texcoordIndices[0] * 2],
+               scene->attributes.texcoords[texcoordIndices[0] * 2 + 1]),
+          vec2(scene->attributes.texcoords[texcoordIndices[1] * 2],
+               scene->attributes.texcoords[texcoordIndices[1] * 2 + 1]),
+          vec2(scene->attributes.texcoords[texcoordIndices[2] * 2],
+               scene->attributes.texcoords[texcoordIndices[2] * 2 + 1]),
+        };
+      }
+
       int materialIndex = mat_ids[face_id];
       const Material *material = nullptr;
       if (materialIndex >= 0)
         material = &scene->materials[materialIndex];
 
       // TODO: texCoord
-      obj.faces.emplace_back(vertices, normals, material);
+      obj.faces.emplace_back(vertices, normals, texcoords, material);
     }
 
     obj.calculateBoundingBox();
