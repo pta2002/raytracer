@@ -31,7 +31,8 @@ vec3 PathTracerShader::getColor(const Intersection &isect) {
       }
     }
 
-    if (!foundIntersection || bounces >= MAX_DEPTH)
+    if (!foundIntersection ||
+        (bounces >= MAX_DEPTH && glm::linearRand(0.0f, 1.0f) > CONTINUE_P))
       break;
 
     // TODO: It's best to only sample one light * n of lights
@@ -42,8 +43,8 @@ vec3 PathTracerShader::getColor(const Intersection &isect) {
     float pdf;
     vec3 f = bsdf.sampleF(wo, wi, pdf);
 
-//    color = wi;
-//    break;
+    //    color = wi;
+    //    break;
 
     if (f == vec3{0.f} || pdf == 0.f)
       break;

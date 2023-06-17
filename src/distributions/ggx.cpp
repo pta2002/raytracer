@@ -17,7 +17,8 @@ vec3 sphericalToCartesian(float theta, float phi) {
   return {sinf(theta) * cosf(phi), cosf(theta), sinf(theta) * sinf(phi)};
 }
 
-GGXDistribution::GGXDistribution(float roughness) : roughness(std::max(roughness, 0.01f)) {}
+GGXDistribution::GGXDistribution(float roughness)
+    : roughness(std::max(roughness, 0.001f)) {}
 
 vec3 GGXDistribution::sample_wh(vec3 wo, vec2 u) const {
   float a2 = roughness * roughness;
@@ -29,9 +30,7 @@ vec3 GGXDistribution::sample_wh(vec3 wo, vec2 u) const {
 
 float GGXDistribution::pdf(vec3 wo, vec3 wh) const { return d(wh) * wh.y; }
 
-float GGXDistribution::g(vec3 wo, vec3 wi) const {
-  return g1(wo) * g1(wi);
-}
+float GGXDistribution::g(vec3 wo, vec3 wi) const { return g1(wo) * g1(wi); }
 
 float GGXDistribution::g1(vec3 w) const {
   float NdotV = w.y;
@@ -41,9 +40,9 @@ float GGXDistribution::g1(vec3 w) const {
 }
 
 float GGXDistribution::d(vec3 wh) const {
-  float a2 = roughness*roughness;
+  float a2 = roughness * roughness;
   float NdotH = max(wh.y, 0.0f);
-  float NdotH2 = NdotH*NdotH;
+  float NdotH2 = NdotH * NdotH;
 
   float nom = a2;
   float denom = (NdotH2 * (a2 - 1.0f) + 1.0f);
