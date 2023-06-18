@@ -1,6 +1,7 @@
 #include "bsdf.hpp"
-#include "glm/geometric.hpp"
-#include "glm/gtc/random.hpp"
+#include <glm/geometric.hpp>
+#include <glm/gtc/random.hpp>
+#include "helpers.hpp"
 
 using namespace glm;
 
@@ -58,5 +59,7 @@ vec3 BSDF::sampleF(vec3 woWorld, vec3 &wiWorld, float &pdf) const {
   if (dot(wiWorld, ns) < 0)
     wiWorld = -wiWorld;
 
-  return f;
+  float NdotL = cosTheta(wi);
+
+  return f * NdotL;
 }
