@@ -19,7 +19,7 @@ public:
 
   vec3 specular{};
   vec3 diffuse{};
-  vec3 albedo{};
+  vec3 baseColor{};
   vec3 emission{};
   vec3 ambient{};
   float shininess;
@@ -38,7 +38,10 @@ public:
    * @param flags Output: flags
    * @return Color at the point
    */
-  [[nodiscard]] vec3 sampleF(vec3 wo, vec3 &wi, float &pdf) const;
+  [[nodiscard]] vec3 sampleFSpecular(vec3 wo, vec3 &wi, float &pdf) const;
   [[nodiscard]] float pdf(vec3 normal, vec3 half) const;
-  [[nodiscard]] vec3 f(vec3 wo, vec3 wi) const;
+  [[nodiscard]] vec3 fSpecular(vec3 wo, vec3 wi) const;
+  vec3 fDiffuse(vec3 wo, vec3 wi, vec3 wh) const;
+  vec3 sampleFDiffuse(vec3 wo, vec3 &wi, float &pdf) const;
+  vec3 reflectance(vec3 wo, vec3 wi, vec3 wh) const;
 };

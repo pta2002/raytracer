@@ -218,7 +218,7 @@ Image Scene::render() {
       for (int i = 0; i < samplesPerPixel; i++) {
         vec2 jitter = glm::linearRand(vec2(0, 0), vec2(1, 1));
         auto ray = camera->getRay(x, y, jitter);
-        //        auto ray = camera->getRay(321, 149, jitter);
+//                auto ray = camera->getRay(483, 270, jitter);
 
         vec3 color = shader.getColor(castRay(camera->pos, ray));
         finalColorR += color.r;

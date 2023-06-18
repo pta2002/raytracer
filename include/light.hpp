@@ -56,9 +56,7 @@ public:
 
   // TODO: This is.. probably... wrong
   [[nodiscard]] vec3 sample(const Intersection &intersection,
-                            const Scene &scene) const override {
-    return {};
-  };
+                            const Scene &scene) const override;
   [[nodiscard]] vec3 sample_Li(const Intersection &intersection, vec3 &wi, const Scene &scene, float &pdf) const override;
 };
 

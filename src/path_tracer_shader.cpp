@@ -43,14 +43,11 @@ vec3 PathTracerShader::getColor(const Intersection &isect) {
     float pdf;
     vec3 f = bsdf.sampleF(wo, wi, pdf);
 
-    //    color = wi;
-    //    break;
-
     if (f == vec3{0.f} || pdf == 0.f)
       break;
     beta *= f * abs(dot(wi, *intersection.shadingNormal)) / pdf;
     specularBounce = true;
-    ray = Ray(*intersection.pos, wi);
+    ray = Ray(*intersection.pos, normalize(wi));
     ray.adjustOrigin(*intersection.shadingNormal);
     intersection = scene.castRay(ray.origin, ray.direction);
   }
@@ -63,7 +60,9 @@ vec3 PathTracerShader::uniformSampleAllLights(const Intersection &intersection,
   vec3 color{0.f};
 
   for (auto light : scene.lights) {
-    color += estimateDirect(intersection, *light, bsdf);
+    if (light->lightType() == POINT) {
+      color += estimateDirect(intersection, *light, bsdf);
+    }
   }
 
   return color;

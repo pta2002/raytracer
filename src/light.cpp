@@ -10,8 +10,19 @@ LightType AmbientLight::lightType() const { return AMBIENT; }
 vec3 AmbientLight::sample_Li(const Intersection &intersection, vec3 &wi,
                              const Scene &scene, float &pdf) const {
   pdf = 1.0f;
-  wi = reflect(-intersection.ray, *intersection.shadingNormal);
-  return vec3{0.f};
+  wi = reflect(intersection.ray, *intersection.shadingNormal);
+  return color;
+}
+vec3 AmbientLight::sample(const Intersection &intersection,
+                          const Scene &scene) const {
+  vec3 sampledColor{.0f};
+  auto material = intersection.face->material;
+
+  if (material->baseColor != vec3{.0f}) {
+    sampledColor = material->baseColor * color;
+  }
+
+  return sampledColor;
 }
 
 // Point
@@ -24,7 +35,7 @@ vec3 PointLight::sample(const Intersection &intersection,
   auto &material = intersection.face->material;
 
   // Step 1: Check material properties (basically albedo != 0)
-  if (material->albedo != vec3{.0f}) {
+  if (material->baseColor != vec3{.0f}) {
     const vec3 lightDir = normalize(position - *intersection.pos);
     const vec3 normal = *intersection.shadingNormal;
 
@@ -50,7 +61,7 @@ vec3 PointLight::sample(const Intersection &intersection,
         // attenuation = 1/distance²
         const float attenuation = 1 / (lightDistance * lightDistance);
 
-        sampledColor = material->albedo * LdotN * intensity * attenuation;
+        sampledColor = material->baseColor * LdotN * intensity * attenuation;
       }
     }
   }

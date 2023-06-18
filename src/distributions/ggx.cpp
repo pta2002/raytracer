@@ -22,6 +22,13 @@ GGXDistribution::GGXDistribution(float roughness)
 
 vec3 GGXDistribution::sample_wh(vec3 wo, vec2 u) const {
   float a2 = roughness * roughness;
+
+  float cosThetaH = sqrtf(max(0.0f, (1.0f - u.x) / ((a2 - 1.0f) * u.x + 1.f)));
+  float sinThetaH = sqrtf(max(0.0f, 1.0f - cosThetaH * cosThetaH));
+  float phiH = u.y * M_PI_2f;
+
+  return {sinThetaH * cosf(phiH), cosThetaH, sinThetaH * sinf(phiH)};
+
   float theta = acosf(sqrtf((1.0f - u.x) / ((a2 - 1.0f) * u.x + 1.0f)));
   float phi = M_2_PIf * u.y;
 
@@ -30,7 +37,11 @@ vec3 GGXDistribution::sample_wh(vec3 wo, vec2 u) const {
 
 float GGXDistribution::pdf(vec3 wo, vec3 wh) const { return d(wh) * wh.y; }
 
-float GGXDistribution::g(vec3 wo, vec3 wi) const { return g1(wo) * g1(wi); }
+float GGXDistribution::g(vec3 wo, vec3 wi) const {
+  float a = g1(wo);
+  float b = g1(wi);
+  return a * b;
+}
 
 float GGXDistribution::g1(vec3 w) const {
   float NdotV = w.y;
@@ -41,7 +52,7 @@ float GGXDistribution::g1(vec3 w) const {
 
 float GGXDistribution::d(vec3 wh) const {
   float a2 = roughness * roughness;
-  float NdotH = max(wh.y, 0.0f);
+  float NdotH = max(std::abs(wh.y), 0.0f);
   float NdotH2 = NdotH * NdotH;
 
   float nom = a2;

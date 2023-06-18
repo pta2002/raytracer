@@ -1,5 +1,6 @@
 #include "bsdf.hpp"
 #include "glm/geometric.hpp"
+#include "glm/gtc/random.hpp"
 
 using namespace glm;
 
@@ -30,13 +31,25 @@ vec3 BSDF::localToWorld(vec3 v) const {
 
 vec3 BSDF::f(vec3 woWorld, vec3 wiWorld) const {
   vec3 wi = worldToLocal(wiWorld), wo = worldToLocal(woWorld);
-  return material->f(wo, wi);
+  vec3 wm = normalize(wi + wo);
+
+  return material->reflectance(wo, wi, wm);
 }
 
 vec3 BSDF::sampleF(vec3 woWorld, vec3 &wiWorld, float &pdf) const {
   vec3 wi, wo = worldToLocal(woWorld);
 
-  vec3 f = material->sampleF(wo, wi, pdf);
+  float diffuseWeight = 1.f - (material->f0.x+material->f0.y+material->f0.z)/3.f;
+
+  vec3 f;
+  if (linearRand(0.f, 1.f) < diffuseWeight) {
+    f = material->sampleFDiffuse(wo, wi, pdf);
+    pdf /= diffuseWeight;
+  } else {
+    f = material->sampleFSpecular(wo, wi, pdf);
+    pdf /= 1.f-diffuseWeight;
+  }
+
   if (pdf == 0)
     return vec3{0.f};
 
