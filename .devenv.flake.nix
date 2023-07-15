@@ -22,7 +22,8 @@
       pkgs = import nixpkgs {
         system = "x86_64-linux";
         config = {
-          allowUnfree = devenv.allowUnfree or false; 
+          allowUnfree = devenv.allowUnfree or false;
+          permittedInsecurePackages = devenv.permittedInsecurePackages or [];
         };
         inherit overlays;
       };
@@ -45,7 +46,7 @@
         specialArgs = inputs // { inherit inputs pkgs; };
         modules = [
           (inputs.devenv.modules + /top-level.nix)
-          { devenv.cliVersion = "0.6.2"; }
+          { devenv.cliVersion = "0.6.3"; }
         ] ++ (map importModule (devenv.imports or [])) ++ [
           ./devenv.nix
           (devenv.devenv or {})
