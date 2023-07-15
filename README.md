@@ -16,3 +16,9 @@ Raytracer developed for a Visualization and Lighting course. It implements a phy
 ## Grade
 
 ⭐ (19.0/20)
+
+## Final Result
+
+<p align="center">
+  <img  src="images/img.png">
+</p>
