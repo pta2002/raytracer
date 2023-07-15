@@ -6,7 +6,7 @@ Raytracer developed for a Visualization and Lighting course. It implements a phy
 * For easy use it's advised to install [CLion](https://www.jetbrains.com/clion/download/#section=windows)
 * Use the Build Function to compile everything
 * Run `./vi-rt models/*.json` to generate a output image of the model as long as there's a `.json` file of it
-* Otherwise, run the `run.sh` script for easy run on linux
+* Otherwise, run the `run.sh` script for easy use on linux
 
 ## Authors
 
